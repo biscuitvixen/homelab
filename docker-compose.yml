@@ -1,0 +1,55 @@
+services:
+  samba:
+    extends:
+      file: ./services/samba/docker-compose.yml
+      service: samba
+
+  tailscale:
+    extends:
+      file: ./services/tailscale/docker-compose.yml
+      service: tailscale
+
+  adguard:
+    extends:
+      file: ./services/adguard/docker-compose.yml
+      service: adguard
+    depends_on:
+      - unbound
+
+  unbound:
+    extends:
+      file: ./services/unbound/docker-compose.yml
+      service: unbound
+
+  caddy:
+    extends:
+      file: ./services/caddy/docker-compose.yml
+      service: caddy
+
+  homeassistant:
+    extends:
+      file: ./services/homeassistant/docker-compose.yml
+      service: homeassistant
+    depends_on:
+      - mosquitto
+
+  mosquitto:
+    extends:
+      file: ./services/mosquitto/docker-compose.yml
+      service: mosquitto
+
+  watchtower:
+    extends:
+      file: ./services/watchtower/docker-compose.yml
+      service: watchtower
+
+  uptime-kuma:
+    extends:
+      file: ./services/uptime-kuma/docker-compose.yml
+      service: uptime-kuma
+
+# Shared network for service communication
+networks:
+  asteria_network:
+    driver: bridge
+    name: asteria_network

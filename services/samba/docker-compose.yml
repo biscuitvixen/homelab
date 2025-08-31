@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  samba:
+    image: dperson/samba:latest
+    container_name: samba
+    restart: unless-stopped
+    ports:
+      - "139:139"
+      - "445:445"
+    volumes:
+      - ${NETWORK_STORAGE_PATH}:/mount 
+    environment:
+      - USERID=${PUID}
+      - GROUPID=${PGID}
+    command: >
+      -s "storage;/mount;yes;no;no;${SAMBA_USER}"
+      -u "${SAMBA_USER};${SAMBA_PASSWORD}"
+    networks:
+      - asteria_network

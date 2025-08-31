@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  tailscale:
+    image: tailscale/tailscale
+    container_name: tailscale
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_HOSTNAME=${TS_HOSTNAME}
+    volumes:
+      - /var/run/tailscale:/var/run/tailscale
+      - /etc/tailscale:/etc/tailscale
+    network_mode: "host"
+    restart: unless-stopped

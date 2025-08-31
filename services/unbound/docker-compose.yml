@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  unbound:
+    image: klutchell/unbound:latest
+    container_name: unbound
+    restart: unless-stopped
+    volumes:
+      - ./config/unbound:/etc/unbound
+      - ./data/unbound:/var/lib/unbound
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    networks:
+      - asteria_network
