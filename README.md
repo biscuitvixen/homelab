@@ -46,7 +46,7 @@ Track the working status of each service:
 
 ### Core Services
 - [x] **Samba** - Network file sharing
-- [ ] **Tailscale** - VPN access
+- [x] **Tailscale** - VPN access
 - [ ] **AdGuard** - DNS ad blocking
 - [ ] **Unbound** - DNS resolver
 
