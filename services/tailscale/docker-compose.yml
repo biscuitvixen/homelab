@@ -7,8 +7,16 @@ services:
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_HOSTNAME=${TS_HOSTNAME}
+      - TS_ACCEPT_DNS=true
+      - TS_EXTRA_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24
     volumes:
       - /var/run/tailscale:/var/run/tailscale
       - /etc/tailscale:/etc/tailscale
     network_mode: "host"
     restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv6.conf.all.forwarding=1
