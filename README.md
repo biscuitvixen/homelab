@@ -57,7 +57,7 @@ Track the working status of each service:
 
 ### Infrastructure
 - [ ] **Mosquitto** - MQTT broker
-- [ ] **Portainer** - Container management
+- [x] **Portainer** - Container management
 - [ ] **Watchtower** - Auto-updates
 
 ## Setup Instructions
