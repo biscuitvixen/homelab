@@ -48,6 +48,11 @@ services:
       file: ./services/uptime-kuma/docker-compose.yml
       service: uptime-kuma
 
+  portainer:
+    extends:
+      file: ./services/portainer/docker-compose.yml
+      service: portainer
+
 # Shared network for service communication
 networks:
   asteria_network:
