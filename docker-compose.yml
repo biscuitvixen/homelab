@@ -3,11 +3,15 @@ services:
     extends:
       file: ./services/samba/docker-compose.yml
       service: samba
+    profiles: ["default"]
+    user: "1001:3001"
 
   tailscale:
     extends:
       file: ./services/tailscale/docker-compose.yml
       service: tailscale
+    profiles: ["default"]
+    user: "1001:3001"
 
   adguard:
     extends:
@@ -15,16 +19,22 @@ services:
       service: adguard
     depends_on:
       - unbound
+    profiles: ["default"]
+    user: "1001:3001"
 
   unbound:
     extends:
       file: ./services/unbound/docker-compose.yml
       service: unbound
+    profiles: ["default"]
+    user: "1001:3001"
 
   caddy:
     extends:
       file: ./services/caddy/docker-compose.yml
       service: caddy
+    profiles: ["default"]
+    user: "1001:3001"
 
   homeassistant:
     extends:
@@ -32,26 +42,36 @@ services:
       service: homeassistant
     depends_on:
       - mosquitto
+    profiles: ["default"]
+    user: "1001:3001"
 
   mosquitto:
     extends:
       file: ./services/mosquitto/docker-compose.yml
       service: mosquitto
+    profiles: ["default"]
+    user: "1001:3001"
 
   watchtower:
     extends:
       file: ./services/watchtower/docker-compose.yml
       service: watchtower
+    profiles: ["default"]
+    user: "1001:3001"
 
   uptime-kuma:
     extends:
       file: ./services/uptime-kuma/docker-compose.yml
       service: uptime-kuma
+    profiles: ["default"]
+    user: "1001:3001"
 
   portainer:
     extends:
       file: ./services/portainer/docker-compose.yml
       service: portainer
+    profiles: ["default"]
+    user: "1001:3001"
 
 # Shared network for service communication
 networks:
