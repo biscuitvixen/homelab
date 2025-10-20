@@ -1,21 +1,21 @@
 services:
   samba:
     extends:
-      file: ./services/samba/docker-compose.yml
+      file: ./services/samba.yml
       service: samba
     profiles: ["default"]
     user: "1001:3001"
 
   tailscale:
     extends:
-      file: ./services/tailscale/docker-compose.yml
+      file: ./services/tailscale.yml
       service: tailscale
     profiles: ["default"]
     user: "1001:3001"
 
   adguard:
     extends:
-      file: ./services/adguard/docker-compose.yml
+      file: ./services/adguard.yml
       service: adguard
     depends_on:
       - unbound
@@ -24,21 +24,21 @@ services:
 
   unbound:
     extends:
-      file: ./services/unbound/docker-compose.yml
+      file: ./services/unbound.yml
       service: unbound
     profiles: ["default"]
     user: "1001:3001"
 
   caddy:
     extends:
-      file: ./services/caddy/docker-compose.yml
+      file: ./services/caddy.yml
       service: caddy
     profiles: ["default"]
     user: "1001:3001"
 
   homeassistant:
     extends:
-      file: ./services/homeassistant/docker-compose.yml
+      file: ./services/homeassistant.yml
       service: homeassistant
     depends_on:
       - mosquitto
@@ -47,28 +47,28 @@ services:
 
   mosquitto:
     extends:
-      file: ./services/mosquitto/docker-compose.yml
+      file: ./services/mosquitto.yml
       service: mosquitto
     profiles: ["default"]
     user: "1001:3001"
 
   watchtower:
     extends:
-      file: ./services/watchtower/docker-compose.yml
+      file: ./services/watchtower.yml
       service: watchtower
     profiles: ["default"]
     user: "1001:3001"
 
   uptime-kuma:
     extends:
-      file: ./services/uptime-kuma/docker-compose.yml
+      file: ./services/uptime-kuma.yml
       service: uptime-kuma
     profiles: ["default"]
     user: "1001:3001"
 
   portainer:
     extends:
-      file: ./services/portainer/docker-compose.yml
+      file: ./services/portainer.yml
       service: portainer
     profiles: ["default"]
     user: "1001:3001"

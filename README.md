@@ -7,25 +7,32 @@ Welcome to the Asteria Home Server project! This project aims to set up a variet
 The project is organized as follows:
 
 ```
-asteria-homeserver
+homelab/
 ├── docker-compose.yml          # Central Docker Compose file
 ├── .env                        # Environment variables for services
 ├── .env.example                # Example environment file with placeholders
-├── services                    # Directory containing individual service configurations
-│   ├── samba                   # Samba network storage service
-│   ├── tailscale               # Tailscale VPN service
-│   ├── adguard                 # AdGuard service
-│   ├── unbound                 # Unbound DNS service
-│   ├── caddy                   # Caddy web server
-│   ├── homeassistant           # Home Assistant service
-│   ├── mosquitto               # Mosquitto MQTT broker
-│   ├── portainer               # Portainer for managing Docker containers
-│   ├── watchtower              # Watchtower for automatic updates
-│   └── uptime-kuma             # Uptime Kuma for service monitoring
-├── data                        # Persistent data storage for services
-├── config                      # Configuration files for services
-└── scripts                     # Scripts for backup, restore, and update
+├── services/                   # Service definitions
+│   ├── samba.yml               # Samba network storage service
+│   ├── tailscale.yml           # Tailscale VPN service
+│   ├── adguard.yml             # AdGuard service
+│   ├── unbound.yml             # Unbound DNS service
+│   ├── caddy.yml               # Caddy web server
+│   ├── homeassistant.yml       # Home Assistant service
+│   ├── mosquitto.yml           # Mosquitto MQTT broker
+│   ├── portainer.yml           # Portainer for managing Docker containers
+│   ├── watchtower.yml          # Watchtower for automatic updates
+│   ├── uptime-kuma.yml         # Uptime Kuma for service monitoring
+│   └── tailscale/              # Additional Tailscale documentation
+│       └── README.md           # Tailscale setup guide
+├── data/                       # Persistent data storage for services
+├── config/                     # Configuration files for services
+└── scripts/                    # Scripts for backup, restore, and update
+    ├── backup.sh
+    ├── restore.sh
+    └── update.sh
 ```
+
+Each service is defined in its own YAML file in the `services/` directory, making it easy to manage and maintain individual services. The main `docker-compose.yml` file references these service definitions using the `extends` feature.
 
 ## Services Overview
 

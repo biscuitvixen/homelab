@@ -1,6 +1,6 @@
 # Tailscale VPN Exit Node Setup
 
-This directory contains the Docker Compose configuration for running Tailscale as a VPN exit node on your Raspberry Pi.
+This guide provides instructions for running Tailscale as a VPN exit node on your Raspberry Pi using the configuration in `services/tailscale.yml`.
 
 ## Prerequisites
 
@@ -19,7 +19,7 @@ sudo sysctl -p
 
 ### 2. Environment Variables
 
-Create a `.env` file in this directory with your Tailscale configuration:
+Create a `.env` file in the homelab root directory with your Tailscale configuration:
 
 ```bash
 TS_AUTHKEY=your_tailscale_auth_key_here
@@ -35,8 +35,10 @@ To get an auth key:
 
 ### 1. Start the Container
 
+From the homelab root directory:
+
 ```bash
-docker-compose up -d
+docker-compose up -d tailscale
 ```
 
 ### 2. Approve Exit Node in Tailscale Admin
@@ -72,6 +74,11 @@ cat /proc/sys/net/ipv4/ip_forward
 ### View Container Logs
 ```bash
 docker-compose logs -f tailscale
+```
+
+Or from the homelab root:
+```bash
+docker logs -f tailscale
 ```
 
 ### Verify Tailscale Status
