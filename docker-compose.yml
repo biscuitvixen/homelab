@@ -1,10 +1,10 @@
 services:
-  samba:
-    extends:
-      file: ./services/samba.yml
-      service: samba
-    profiles: ["default"]
-    user: "1001:3001"
+  # samba:
+  #   extends:
+  #     file: ./services/samba.yml
+  #     service: samba
+  #   profiles: ["default"]
+  #   user: "1001:3001"
 
   tailscale:
     extends:
@@ -56,13 +56,6 @@ services:
     extends:
       file: ./services/watchtower.yml
       service: watchtower
-    profiles: ["default"]
-    user: "1001:3001"
-
-  uptime-kuma:
-    extends:
-      file: ./services/uptime-kuma.yml
-      service: uptime-kuma
     profiles: ["default"]
     user: "1001:3001"
 
