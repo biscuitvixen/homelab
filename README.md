@@ -37,7 +37,7 @@ Each service is defined in its own YAML file in the `services/` directory, makin
 ## Services Overview
 
 - **Samba**: Network file sharing service for accessing storage across devices.
-- **Tailscale**: A VPN service that allows secure access to your home network from anywhere.
+- **Tailscale**: A VPN service that allows secure access to your home network from anywhere. Includes separate configurations for server and Raspberry Pi deployments.
 - **AdGuard**: A network-wide ad blocker that enhances your browsing experience.
 - **Unbound**: A validating, recursive, and caching DNS resolver.
 - **Caddy**: A modern web server with automatic HTTPS.
@@ -53,7 +53,7 @@ Track the working status of each service:
 
 ### Core Services
 - [x] **Samba** - Network file sharing
-- [x] **Tailscale** - VPN access
+- [x] **Tailscale** - VPN access (server & Pi configurations)
 - [ ] **AdGuard** - DNS ad blocking
 - [ ] **Unbound** - DNS resolver
 
@@ -69,11 +69,22 @@ Track the working status of each service:
 
 ## Setup Instructions
 
-1. **Clone the Repository**: Clone this repository to your Raspberry Pi.
+1. **Clone the Repository**: Clone this repository to your server or Raspberry Pi.
 2. **Configure Environment Variables**: Edit the `.env` file to set up your environment variables.
 3. **Add Secrets**: Fill in the `secrets.env` file with any sensitive information required by your services.
-4. **Start Services**: Run `docker-compose up -d` from the root of the project to start all services.
+4. **Start Services**: 
+   - For server deployment: `docker compose --profile serv up -d`
+   - For Raspberry Pi deployment: `docker compose --profile pi up -d`
 5. **Access Services**: Use the respective URLs and ports to access each service.
+
+### Profile-Based Deployment
+
+This homelab supports different deployment profiles:
+
+- **`serv` profile**: Full server setup with advanced configurations and all services
+- **`pi` profile**: Raspberry Pi setup with Tailscale exit node and route advertising
+
+Use the appropriate profile when starting services to match your deployment environment.
 
 ## Backup and Restore
 
