@@ -9,6 +9,8 @@ services:
   tailscale:
     extends:
       file: ./services/tailscale.yml
+    # profiles: defined in `tailscale.yml` for both server and pi
+    # networks: Not attached as it uses host networking
 
   adguard:
     extends:
