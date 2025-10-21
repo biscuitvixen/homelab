@@ -1,17 +1,20 @@
 services:
   tailscale:
-    image: tailscale/tailscale
+    image: tailscale/tailscale:stable
     container_name: tailscale
+    network_mode: "host"                 # use host net stack
+    cap_add:
+      - NET_ADMIN                        # allow route/iptables tweaks
+      - NET_RAW                          # allow raw sockets (ping)
+    devices:
+      - /dev/net/tun:/dev/net/tun        # tunnel device
     environment:
       - TS_AUTHKEY=${TS_AUTHKEY}
       - TS_HOSTNAME=${TS_HOSTNAME}
       - TS_ACCEPT_DNS=true
-      - TS_EXTRA_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24
+      - TS_EXTRA_ARGS=${TS_ARGS}
     volumes:
       - /var/run/tailscale:/var/run/tailscale
-      - /etc/tailscale:/etc/tailscale
-    network_mode: "host"
+      - ${BASE}/appdata/tailscale_${TS_STATE_SUFFIX:-primary}:/var/lib/tailscale
+      - ${BASE}/configs/tailscale_${TS_STATE_SUFFIX:-primary}:/etc/tailscale
     restart: unless-stopped
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
