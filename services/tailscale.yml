@@ -32,7 +32,6 @@ services:
       - /var/run/tailscale:/var/run/tailscale
       - ${BASE}/appdata/tailscale_${TS_STATE_SUFFIX:-primary}:/var/lib/tailscale
       - ${BASE}/configs/tailscale_${TS_STATE_SUFFIX:-primary}:/etc/tailscale
-    profiles: ["serv"]
     user: "1001:3001"
 
   tailscale-pi:
@@ -43,4 +42,3 @@ services:
     volumes:
       - /var/run/tailscale:/var/run/tailscale
       - /etc/tailscale:/etc/tailscale
-    profiles: ["pi"]

@@ -6,11 +6,17 @@ services:
   #   profiles: ["serv"]
   #   user: "1001:3001"
 
-  tailscale:
+  tailscale-server:
     extends:
       file: ./services/tailscale.yml
-    # profiles: defined in `tailscale.yml` for both server and pi
-    # networks: Not attached as it uses host networking
+      service: tailscale-server
+    profiles: ["serv"]
+
+  tailscale-pi:
+    extends:
+      file: ./services/tailscale.yml
+      service: tailscale-pi
+    profiles: ["pi"]
 
   adguard:
     extends:
