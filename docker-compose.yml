@@ -9,9 +9,6 @@ services:
   tailscale:
     extends:
       file: ./services/tailscale.yml
-      service: tailscale-server
-    profiles: ["serv"]
-    user: "1001:3001"
 
   adguard:
     extends:

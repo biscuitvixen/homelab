@@ -1,5 +1,5 @@
 services:
-  tailscale:
+  tailscale-server:
     image: tailscale/tailscale:stable
     container_name: tailscale
     network_mode: "host"                 # use host net stack
@@ -18,3 +18,23 @@ services:
       - ${BASE}/appdata/tailscale_${TS_STATE_SUFFIX:-primary}:/var/lib/tailscale
       - ${BASE}/configs/tailscale_${TS_STATE_SUFFIX:-primary}:/etc/tailscale
     restart: unless-stopped
+    profiles: ["serv"]
+    user: "1001:3001"
+
+  tailscale-pi:
+    image: tailscale/tailscale:stable
+    container_name: tailscale-pi
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_HOSTNAME=${TS_HOSTNAME}
+      - TS_ACCEPT_DNS=true
+      - TS_EXTRA_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24
+    volumes:
+      - /var/run/tailscale:/var/run/tailscale
+      - /etc/tailscale:/etc/tailscale
+    restart: unless-stopped
+    profiles: ["pi"]
