@@ -3,14 +3,14 @@ services:
   #   extends:
   #     file: ./services/samba.yml
   #     service: samba
-  #   profiles: ["default"]
+  #   profiles: ["serv"]
   #   user: "1001:3001"
 
   tailscale:
     extends:
       file: ./services/tailscale.yml
-      service: tailscale
-    profiles: ["default"]
+      service: tailscale-server
+    profiles: ["serv"]
     user: "1001:3001"
 
   adguard:
@@ -19,21 +19,21 @@ services:
       service: adguard
     depends_on:
       - unbound
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
   unbound:
     extends:
       file: ./services/unbound.yml
       service: unbound
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
   caddy:
     extends:
       file: ./services/caddy.yml
       service: caddy
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
   homeassistant:
@@ -42,28 +42,28 @@ services:
       service: homeassistant
     depends_on:
       - mosquitto
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
   mosquitto:
     extends:
       file: ./services/mosquitto.yml
       service: mosquitto
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
   watchtower:
     extends:
       file: ./services/watchtower.yml
       service: watchtower
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
   portainer:
     extends:
       file: ./services/portainer.yml
       service: portainer
-    profiles: ["default"]
+    profiles: ["serv"]
     user: "1001:3001"
 
 # Shared network for service communication
