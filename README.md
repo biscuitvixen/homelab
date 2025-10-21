@@ -52,10 +52,10 @@ Each service is defined in its own YAML file in the `services/` directory, makin
 Track the working status of each service:
 
 ### Core Services
-- [x] **Samba** - Network file sharing
+- ~~[x] **Samba** - Network file sharing~~
 - [x] **Tailscale** - VPN access (server & Pi configurations)
 - [ ] **AdGuard** - DNS ad blocking
-- [ ] **Unbound** - DNS resolver
+- [-] **Unbound** - DNS resolver
 
 ### Web Services  
 - [ ] **Caddy** - Reverse proxy & HTTPS
@@ -64,7 +64,7 @@ Track the working status of each service:
 
 ### Infrastructure
 - [ ] **Mosquitto** - MQTT broker
-- [x] **Portainer** - Container management
+- [ ] **Portainer** - Container management
 - [ ] **Watchtower** - Auto-updates
 
 ## Setup Instructions
