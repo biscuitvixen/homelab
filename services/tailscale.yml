@@ -20,6 +20,12 @@ services:
     restart: unless-stopped
     profiles: ["serv"]
     user: "1001:3001"
+    healthcheck:
+      test: ["CMD", "tailscale", "status", "--peers=false"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   tailscale-pi:
     image: tailscale/tailscale:stable
@@ -38,3 +44,9 @@ services:
       - /etc/tailscale:/etc/tailscale
     restart: unless-stopped
     profiles: ["pi"]
+    healthcheck:
+      test: ["CMD", "tailscale", "status", "--peers=false"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
