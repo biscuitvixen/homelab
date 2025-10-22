@@ -55,7 +55,7 @@ Track the working status of each service:
 - ~~[x] **Samba** - Network file sharing~~
 - [x] **Tailscale** - VPN access (server & Pi configurations)
 - [ ] **AdGuard** - DNS ad blocking
-- [-] **Unbound** - DNS resolver
+- [x] **Unbound** - DNS resolver
 
 ### Web Services  
 - [ ] **Caddy** - Reverse proxy & HTTPS
