@@ -18,7 +18,7 @@ x-tailscale-base: &tailscale-base
   restart: unless-stopped
   healthcheck:
     test: ["CMD", "tailscale", "status", "--peers=false"]
-    interval: 30s
+    interval: 60s
     timeout: 10s
     retries: 3
     start_period: 60s
