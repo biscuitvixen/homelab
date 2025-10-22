@@ -34,7 +34,6 @@ services:
       file: ./services/unbound.yml
       service: unbound
     profiles: ["serv"]
-    user: "1001:3001"
     networks:
       - homelab_network
 

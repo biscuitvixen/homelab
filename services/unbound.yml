@@ -8,9 +8,8 @@ services:
       - "53:53/tcp"   # TCP fallback / large replies
     # Configs are read-only (:ro)
     volumes:
-      - ${BASE}/configs/unbound:/opt/unbound/etc/unbound:ro   # your unbound.conf, local records, etc.
+      - ${BASE}/configs/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro   # your unbound.conf, local records, etc.
     restart: unless-stopped
-    user: "1001:3001"
     profiles: ["serv"]
     healthcheck:
       test: ["CMD", "drill", "@127.0.0.1", "cloudflare.com", "A"]
