@@ -31,9 +31,8 @@ services:
     # Server-specific volumes with BASE path for persistence
     volumes:
       - /var/run/tailscale:/var/run/tailscale
-      - ${BASE}/appdata/tailscale_${TS_STATE_SUFFIX:-primary}:/var/lib/tailscale
-      - ${BASE}/configs/tailscale_${TS_STATE_SUFFIX:-primary}:/etc/tailscale
-    user: "1001:3001"
+      - ${BASE}/appdata/tailscale:/var/lib/tailscale
+      - ${BASE}/configs/tailscale:/etc/tailscale
 
   tailscale-pi:
     # Inherit all properties from the base template using YAML merge syntax
