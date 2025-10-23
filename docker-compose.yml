@@ -41,11 +41,6 @@ services:
     extends:
       file: ./services/caddy.yml
       service: caddy
-    depends_on:
-      adguard:
-        condition: service_healthy
-      unbound:
-        condition: service_healthy
     profiles: ["serv", "dns"]
     networks:
       - homelab_network
