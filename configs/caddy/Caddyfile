@@ -1,0 +1,74 @@
+{
+	# Optional: quieten logs / set contact email
+	# email you@example.com
+	admin off
+}
+
+# === a tiny reusable snippet for internal TLS ===
+(tls_internal) {
+	tls internal
+    Strict-Transport-Security: max-age=31536000;
+}
+
+# === reverse proxies for your services ===
+# Replace hostnames or ports to match your compose services.
+
+adguard.lan {
+	import tls_internal
+	reverse_proxy adguard:3000
+}
+
+unbound.lan {
+	import tls_internal
+	# (no UI typically; you can remove this if unused)
+	respond "Unbound resolver (no UI exposed via Caddy)" 200
+}
+
+portainer.lan {
+	import tls_internal
+	reverse_proxy portainer:9000
+}
+
+home.lan {
+	import tls_internal
+	reverse_proxy homeassistant:8123
+}
+
+mosquitto.lan {
+	import tls_internal
+	respond "MQTT has no web UI here" 200
+}
+
+# Example for something on a raw LAN IP (e.g., TrueNAS GUI)
+# If TrueNAS uses self-signed TLS, this passes through with insecure skip-verify.
+truenas.lan {
+	import tls_internal
+	reverse_proxy https://192.168.0.10:443 {
+		transport http {
+			tls_insecure_skip_verify
+		}
+	}
+}
+
+# Optional: a landing page at https://lab.lan/
+lab.lan {
+	import tls_internal
+	@root path /
+	handle @root {
+		respond <<-EOF
+		<!doctype html>
+		<html>
+		  <head><meta charset="utf-8"><title>Homelab</title></head>
+		  <body style="font-family: system-ui; max-width: 800px; margin: 3rem auto;">
+		    <h1>Homelab</h1>
+		    <ul>
+		      <li><a href="https://adguard.lan">AdGuard</a></li>
+		      <li><a href="https://home.lan">Home Assistant</a></li>
+		      <li><a href="https://portainer.lan">Portainer</a></li>
+		      <li><a href="https://truenas.lan">TrueNAS</a></li>
+		    </ul>
+		  </body>
+		</html>
+		EOF
+	}
+}
