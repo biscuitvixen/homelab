@@ -31,7 +31,8 @@ services:
       file: ./services/adguard.yml
       service: adguard
     depends_on:
-      - unbound
+      unbound:
+        condition: service_healthy
     profiles: ["serv", "dns"]
     networks:
       - homelab_network
@@ -41,8 +42,10 @@ services:
       file: ./services/caddy.yml
       service: caddy
     depends_on:
-      - adguard
-      - unbound
+      adguard:
+        condition: service_healthy
+      unbound:
+        condition: service_healthy
     profiles: ["serv", "dns"]
     networks:
       - homelab_network
