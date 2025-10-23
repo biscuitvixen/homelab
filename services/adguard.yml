@@ -3,8 +3,9 @@ services:
     image: adguard/adguardhome:latest
     container_name: adguard
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
+      - "53:53/tcp"   # DNS ports
+      - "53:53/udp"   # DNS ports
+      - "3000:3000"   # Initial setup
       # - "80:80"
       # - "443:443"
     volumes:
