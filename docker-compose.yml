@@ -18,21 +18,21 @@ services:
       service: tailscale-pi
     profiles: ["pi"]
 
+  unbound:
+    extends:
+      file: ./services/unbound.yml
+      service: unbound
+    profiles: ["serv", "dns"]
+    networks:
+      - homelab_network
+
   adguard:
     extends:
       file: ./services/adguard.yml
       service: adguard
     depends_on:
       - unbound
-    profiles: ["serv"]
-    networks:
-      - homelab_network
-
-  unbound:
-    extends:
-      file: ./services/unbound.yml
-      service: unbound
-    profiles: ["serv"]
+    profiles: ["serv", "dns"]
     networks:
       - homelab_network
 
@@ -40,7 +40,10 @@ services:
     extends:
       file: ./services/caddy.yml
       service: caddy
-    profiles: ["serv"]
+    depends_on:
+      - adguard
+      - unbound
+    profiles: ["serv", "dns"]
     networks:
       - homelab_network
 
