@@ -56,14 +56,13 @@ Track the working status of each service:
 - [x] **Tailscale** - VPN access (server & Pi configurations)
 - [ ] **AdGuard** - DNS ad blocking
 - [x] **Unbound** - DNS resolver
+- [-] **Caddy** - Reverse proxy & HTTPS
 
-### Web Services  
-- [ ] **Caddy** - Reverse proxy & HTTPS
+### IoT & Home Automation
 - [ ] **Home Assistant** - Home automation
-- [ ] **Uptime Kuma** - Status monitoring
+- [ ] **Mosquitto** - MQTT broker
 
 ### Infrastructure
-- [ ] **Mosquitto** - MQTT broker
 - [ ] **Portainer** - Container management
 - [ ] **Watchtower** - Auto-updates
 
