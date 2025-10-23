@@ -7,7 +7,6 @@
 # === a tiny reusable snippet for internal TLS ===
 (tls_internal) {
 	tls internal
-    Strict-Transport-Security: max-age=31536000;
 }
 
 # === reverse proxies for your services ===
@@ -69,7 +68,7 @@ lab.lan {
 		    </ul>
 		  </body>
 		</html>
-		EOF
+		-EOF
 	}
 }
 
