@@ -3,8 +3,8 @@ services:
     image: mvance/unbound:latest
     container_name: unbound
     # Expose DNS to the LAN host
-    ports:
-      # Ports not published as unbound is running internal-only
+    # Ports not published as unbound is running internal-only
+    # ports:
       # - "53:53/udp"   # DNS over UDP
       # - "53:53/tcp"   # TCP fallback / large replies
     # Configs are read-only (:ro)
