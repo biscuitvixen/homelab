@@ -86,3 +86,7 @@ networks:
   homelab_network:
     driver: bridge
     name: homelab_network
+
+volumes:
+  # Ephemeral volume for Caddy's config persistence
+  caddy_config:
