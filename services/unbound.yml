@@ -12,7 +12,6 @@ services:
       # - ${BASE}/configs/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro   # your unbound.conf, local records, etc.
       - ../configs/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro
     restart: unless-stopped
-    profiles: ["serv"]
     healthcheck:
       test: ["CMD", "drill", "@127.0.0.1", "cloudflare.com", "A"]
       interval: 30s
