@@ -4,9 +4,9 @@ services:
     container_name: unbound
     # Expose DNS to the LAN host
     # Ports not published as unbound is running internal-only
-    # ports:
-      # - "53:53/udp"   # DNS over UDP
-      # - "53:53/tcp"   # TCP fallback / large replies
+    ports:
+      - "66:53/udp"   # DNS over UDP
+      - "66:53/tcp"   # TCP fallback / large replies
     # Configs are read-only (:ro)
     volumes:
       # - ${BASE}/configs/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro   # your unbound.conf, local records, etc.
