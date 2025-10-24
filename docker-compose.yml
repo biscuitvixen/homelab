@@ -68,8 +68,6 @@ services:
       file: ./services/watchtower.yml
       service: watchtower
     profiles: ["serv"]
-    networks:
-      - homelab_network
 
   portainer:
     extends:

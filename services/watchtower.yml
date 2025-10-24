@@ -3,14 +3,17 @@ services:
     image: containrrr/watchtower
     container_name: watchtower
     volumes:
+      # Bind mount docker to allow it to access the Docker daemon socket
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - WATCHTOWER_POLL_INTERVAL=3600
-      - WATCHTOWER_NOTIFICATIONS=email
-      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=your_email@example.com
-      - WATCHTOWER_NOTIFICATION_EMAIL_TO=your_email@example.com
-      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=smtp.example.com
-      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=587
-      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=your_email@example.com
-      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${EMAIL_PASSWORD}
+      # Run at 5 AM daily (cron format)
+      - WATCHTOWER_SCHEDULE=0 0 5 * * *
+      # Clean up old images after updating
+      - WATCHTOWER_CLEANUP=true
+      # Include stopped containers in monitoring
+      - WATCHTOWER_INCLUDE_STOPPED=true
+      # Only monitor containers with label (optional, safer)
+      # - WATCHTOWER_LABEL_ENABLE=true
+      # Send notifications (optional)
+      # - WATCHTOWER_NOTIFICATION_URL=discord://token@id
     restart: unless-stopped
