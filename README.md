@@ -64,7 +64,7 @@ Track the working status of each service:
 
 ### Infrastructure
 - [ ] **Portainer** - Container management
-- [ ] **Watchtower** - Auto-updates
+- [x] **Watchtower** - Auto-updates
 
 ## Setup Instructions
 
