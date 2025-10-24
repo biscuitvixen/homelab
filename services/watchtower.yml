@@ -16,4 +16,10 @@ services:
       # - WATCHTOWER_LABEL_ENABLE=true
       # Send notifications (optional)
       # - WATCHTOWER_NOTIFICATION_URL=discord://token@id
+    healthcheck:
+      test: ["CMD", "pgrep", "watchtower"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
