@@ -54,9 +54,9 @@ Track the working status of each service:
 ### Core Services
 - ~~[x] **Samba** - Network file sharing~~
 - [x] **Tailscale** - VPN access (server & Pi configurations)
-- [ ] **AdGuard** - DNS ad blocking
+- [x] **AdGuard** - DNS ad blocking
 - [x] **Unbound** - DNS resolver
-- [-] **Caddy** - Reverse proxy & HTTPS
+- [x] **Caddy** - Reverse proxy & HTTPS
 
 ### IoT & Home Automation
 - [ ] **Home Assistant** - Home automation
