@@ -23,20 +23,20 @@ unbound.lan {
 	respond "Unbound resolver (no UI exposed via Caddy)" 200
 }
 
-<!-- portainer.lan {
-	import tls_internal
-	reverse_proxy portainer:9000
-} -->
+#portainer.lan {
+#	import tls_internal
+#	reverse_proxy portainer:9000
+#}
 
-<!-- home.lan {
-	import tls_internal
-	reverse_proxy homeassistant:8123
-} -->
+#home.lan {
+#	import tls_internal
+#	reverse_proxy homeassistant:8123
+#}
 
-<!-- mosquitto.lan {
-	import tls_internal
-	respond "MQTT has no web UI here" 200
-} -->
+#mosquitto.lan {
+#	import tls_internal
+#	respond "MQTT has no web UI here" 200
+#}
 
 # Example for something on a raw LAN IP (e.g., TrueNAS GUI)
 # If TrueNAS uses self-signed TLS, this passes through with insecure skip-verify.
