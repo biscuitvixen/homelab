@@ -9,46 +9,47 @@
 	tls internal
 }
 
-# === reverse proxies ===
+# === Reverse proxies ===
 
 adguard.lan {
 	import tls_internal
 	reverse_proxy adguard:80
 }
 
-unbound.lan {
-	import tls_internal
-	# (no UI typically; you can remove this if unused)
-	respond "Unbound resolver (no UI exposed via Caddy)" 200
-}
-
-#portainer.lan {
-#	import tls_internal
-#	reverse_proxy portainer:9000
-#}
-
 home.lan {
-	import tls_internal
-	reverse_proxy 192.168.0.12:8123
+  import tls_internal
+	reverse_proxy https://192.168.0.12:8123 {
+    transport http {
+      tls_insecure_skip_verify
+    }
+    header_up Host {host}          # preserve original host header
+    header_up X-Forwarded-For {remote}
+    header_up X-Forwarded-Proto {scheme}
+  }
 }
 
-#mosquitto.lan {
-#	import tls_internal
-#	respond "MQTT has no web UI here" 200
-#}
-
-# Example for something on a raw LAN IP (e.g., TrueNAS GUI)
-# If TrueNAS uses self-signed TLS, this passes through with insecure skip-verify.
 truenas.lan {
-	import tls_internal
-	reverse_proxy https://192.168.0.10:443 {
-		transport http {
-			tls_insecure_skip_verify
-		}
-	}
+  import tls_internal
+	reverse_proxy https://192.168.0.11 {
+    transport http {
+      tls_insecure_skip_verify
+    }
+    header_up Host {host}
+    header_up X-Forwarded-For {remote}
+    header_up X-Forwarded-Proto {scheme}
+  }
 }
 
-# Optional: a landing page at https://lab.lan/
+pve.lan {
+  import tls_internal
+  reverse_proxy https://192.168.0.10:8006 {
+    transport http {
+      tls_insecure_skip_verify
+    }
+  }
+}
+
+# A landing page at https://lab.lan/
 lab.lan {
 	import tls_internal
 	@root path /
