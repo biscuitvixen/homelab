@@ -81,3 +81,4 @@ volumes:
   # Ephemeral volume for Caddy's config persistence
   caddy_config:
   mosquitto_data:
+  mosquitto_logs:
