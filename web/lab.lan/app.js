@@ -41,8 +41,7 @@ createApp({
         
         state.links = items.map(x => ({
           ...x, 
-          host: hostFromUrl(x.href), 
-          statusClass: ""
+          host: hostFromUrl(x.href)
         }));
         
         console.log("State links after mapping:", state.links);
