@@ -18,11 +18,7 @@ adguard.lan {
 
 home.lan {
   import tls_internal
-	reverse_proxy https://192.168.0.12:8123 {
-    transport http {
-      tls_insecure_skip_verify
-    }
-  }
+	reverse_proxy https://192.168.0.12:8123
 }
 
 truenas.lan {
