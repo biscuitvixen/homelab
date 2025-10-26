@@ -2,7 +2,6 @@
 	# Optional: quieten logs / set contact email
 	# email you@example.com
 	admin off
-	encode zstd gzip
 }
 
 # === a tiny reusable snippet for internal TLS ===
