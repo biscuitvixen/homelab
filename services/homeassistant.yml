@@ -2,10 +2,11 @@ services:
   homeassistant:
     image: homeassistant/home-assistant:latest
     container_name: homeassistant
+    ports:
+      - 8123
     volumes:
       - ${BASE}/appdata/homeassistant:/config
     environment:
       - TZ=${TZ}
-      - HA_API_PASSWORD=${HA_API_PASSWORD}
     restart: unless-stopped
     network_mode: host
