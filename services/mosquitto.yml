@@ -6,8 +6,6 @@ services:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - ${BASE}/appdata/mosquitto/data:/mosquitto/data
-      - ${BASE}/appdata/mosquitto/log:/mosquitto/log
-      # - ${BASE}/configs/mosquitto:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
       - ../configs/mosquitto:/mosquitto/config:ro
     restart: unless-stopped
