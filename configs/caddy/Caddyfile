@@ -9,8 +9,7 @@
 	tls internal
 }
 
-# === reverse proxies for your services ===
-# Replace hostnames or ports to match your compose services.
+# === reverse proxies ===
 
 adguard.lan {
 	import tls_internal
@@ -70,16 +69,4 @@ lab.lan {
 		</html>
 		-EOF
 	}
-}
-
-# Default catch-all
-:443 {
-  tls internal
-  respond "Caddy is running (default vhost)" 200
-}
-
-# Example for localhost testing
-localhost {
-  tls internal
-  respond "Caddy on localhost" 200
 }
