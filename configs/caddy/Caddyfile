@@ -28,10 +28,10 @@ unbound.lan {
 #	reverse_proxy portainer:9000
 #}
 
-#home.lan {
-#	import tls_internal
-#	reverse_proxy homeassistant:8123
-#}
+home.lan {
+	import tls_internal
+	reverse_proxy host.docker.internal:8123
+}
 
 #mosquitto.lan {
 #	import tls_internal

@@ -3,7 +3,7 @@ services:
     image: homeassistant/home-assistant:latest
     container_name: homeassistant
     volumes:
-      - ../data/homeassistant:/config
+      - ${BASE}/appdata/homeassistant:/config
     environment:
       - TZ=${TZ}
       - HA_API_PASSWORD=${HA_API_PASSWORD}

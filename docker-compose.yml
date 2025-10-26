@@ -51,17 +51,13 @@ services:
       service: homeassistant
     depends_on:
       - mosquitto
-    profiles: ["serv"]
-    networks:
-      - homelab_network
+    profiles: ["serv", "iot"]
 
   mosquitto:
     extends:
       file: ./services/mosquitto.yml
       service: mosquitto
-    profiles: ["serv"]
-    networks:
-      - homelab_network
+    profiles: ["serv", "iot"]
 
   watchtower:
     extends:
