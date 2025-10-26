@@ -9,6 +9,7 @@ services:
       - ../configs/caddy/Caddyfile:/etc/caddy/Caddyfile:ro  # Config file
       - ${BASE}/appdata/caddy/data:/data                    # Caddy's cert store (internal CA, certs, OCSP cache)
       - caddy_config:/config                                # Admin API state (optional but nice to persist)
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
       interval: 30s
