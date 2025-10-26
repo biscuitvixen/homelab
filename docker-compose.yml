@@ -49,8 +49,6 @@ services:
     extends:
       file: ./services/homeassistant.yml
       service: homeassistant
-    depends_on:
-      - mosquitto
     profiles: ["serv", "iot"]
 
   mosquitto:
