@@ -69,13 +69,13 @@ services:
       service: watchtower
     profiles: ["serv"]
 
-  portainer:
-    extends:
-      file: ./services/portainer.yml
-      service: portainer
-    profiles: ["serv"]
-    networks:
-      - homelab_network
+  # portainer:
+  #   extends:
+  #     file: ./services/portainer.yml
+  #     service: portainer
+  #   # profiles: ["serv"]
+  #   networks:
+  #     - homelab_network
 
 # Shared network for service communication
 networks:
