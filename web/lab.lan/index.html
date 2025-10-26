@@ -5,58 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>Homelab</title>
     <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="styles.css" />
     <!-- Vue 3 via CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <style>
-      :root {
-        color-scheme: light dark;
-        --fg: #1a1a1a; --bg: #fff; --muted: #6b7280;
-        --card: #f5f5f7; --ring: rgba(0, 0, 0, 0.08);
-        --ok: #22c55e; --down: #ef4444;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --fg: #e5e7eb; --bg: #0b0b0c; --muted: #9ca3af;
-          --card: #141417; --ring: rgba(255,255,255,.08);
-        }
-      }
-      * { box-sizing: border-box; }
-      html, body { height: 100%; }
-      body {
-        margin: 0; background: var(--bg); color: var(--fg);
-        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
-        display: grid; place-items: start center;
-      }
-      .container { width: min(960px, 92vw); margin: 3rem auto; }
-      header { margin-bottom: 1.25rem; }
-      h1 { margin: 0 0 .3rem; font-size: clamp(1.6rem, 3.8vw, 2.2rem); }
-      p.desc { margin: 0; color: var(--muted); }
-      .grid {
-        display: grid; gap: 1rem;
-        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-        margin-top: 1.5rem;
-      }
-      .card {
-        display: block; text-decoration: none; color: inherit;
-        background: var(--card); border: 1px solid var(--ring);
-        border-radius: 18px; padding: 1rem 1.1rem;
-        transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease;
-      }
-      .card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px var(--ring); border-color: transparent; }
-      .card h3 { margin: 0 0 .35rem; font-size: 1.05rem; }
-      .muted { color: var(--muted); font-size: .92rem; }
-      .status { width: .6rem; height: .6rem; border-radius: 999px; display: inline-block; vertical-align: middle; margin-right: .5rem; background: var(--muted); }
-      .ok { background: var(--ok); } .down { background: var(--down); }
-      footer { margin-top: 2rem; color: var(--muted); font-size: .9rem; }
-      .row { display: flex; gap: .6rem; align-items: center; justify-content: space-between; }
-      .right { font-variant-numeric: tabular-nums; font-size: .85rem; color: var(--muted); }
-      .controls { margin-top: .5rem; text-align: right; }
-      button {
-        font: inherit; border: 1px solid var(--ring); background: transparent; color: inherit;
-        padding: .35rem .6rem; border-radius: .6rem; cursor: pointer;
-      }
-      button:hover { background: var(--ring); }
-    </style>
   </head>
   <body>
     <div id="app" class="container">
@@ -82,51 +33,6 @@
       <footer>Served by Caddy with internal TLS.</footer>
     </div>
 
-    <script>
-      const { createApp, reactive, onMounted } = Vue;
-
-      function hostFromUrl(u) {
-        try { return new URL(u).host; } catch { return ""; }
-      }
-
-      async function probe(url, ms=2500) {
-        // Best-effort: cross-origin HEAD with timeout; success => green
-        const ctl = new AbortController();
-        const t = setTimeout(() => ctl.abort(), ms);
-        try {
-          await fetch(url, { method: "HEAD", mode: "no-cors", signal: ctl.signal });
-          clearTimeout(t);
-          return "ok";
-        } catch {
-          clearTimeout(t);
-          return "down";
-        }
-      }
-
-      createApp({
-        setup() {
-          const state = reactive({ links: [] });
-
-          async function load() {
-            const res = await fetch("services.json", { cache: "no-cache" });
-            const items = await res.json();
-            state.links = items.map(x => ({
-              ...x, host: hostFromUrl(x.href), statusClass: ""
-            }));
-            probeAll();
-          }
-
-          async function probeAll() {
-            for (const item of state.links) {
-              item.statusClass = ""; // reset
-              item.statusClass = await probe(item.href);
-            }
-          }
-
-          onMounted(load);
-          return { ...state, probeAll };
-        }
-      }).mount("#app");
-    </script>
+    <script src="app.js"></script>
   </body>
 </html>
