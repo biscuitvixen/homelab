@@ -42,22 +42,14 @@ pve.lan {
 # A landing page at https://lab.lan/
 lab.lan {
 	import tls_internal
-	@root path /
-	handle @root {
-		respond <<-EOF
-		<!doctype html>
-		<html>
-		  <head><meta charset="utf-8"><title>Homelab</title></head>
-		  <body style="font-family: system-ui; max-width: 800px; margin: 3rem auto;">
-		    <h1>Homelab</h1>
-		    <ul>
-		      <li><a href="https://adguard.lan">AdGuard</a></li>
-		      <li><a href="https://home.lan">Home Assistant</a></li>
-		      <li><a href="https://portainer.lan">Portainer</a></li>
-		      <li><a href="https://truenas.lan">TrueNAS</a></li>
-		    </ul>
-		  </body>
-		</html>
-		-EOF
-	}
+	
+	root * /web/lab.lan
+	file_server
+
+	# Ensure JSON files are served with correct MIME type
+    @json path *.json
+    header @json Content-Type application/json
+
+	# Serve files if they exist, otherwise serve index.html for SPA routing
+	try_files {path} /index.html
 }
