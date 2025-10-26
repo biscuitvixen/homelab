@@ -9,5 +9,5 @@ services:
       - ${BASE}/appdata/mosquitto/data:/mosquitto/data
       - ${BASE}/appdata/mosquitto/log:/mosquitto/log
       # - ${BASE}/configs/mosquitto:/mosquitto/config
-      - ../configs/mosquitto:/mosquitto/config
+      - ../configs/mosquitto:/mosquitto/config:ro
     restart: unless-stopped
