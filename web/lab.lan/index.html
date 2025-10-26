@@ -124,7 +124,7 @@
           }
 
           onMounted(load);
-          return { links: state.links, probeAll };
+          return { ...state, probeAll };
         }
       }).mount("#app");
     </script>
