@@ -28,34 +28,14 @@ async function probe(target, ms = 2500) {
       method: "GET",
       cache: "no-store",
       redirect: "follow",
-      signal: ctl.signal
+      signal: ctl.signal,
+      mode: "no-cors"  // This will help avoid CORS issues but limits response info
     });
     
-    // Check for specific error status codes that indicate the service is down
-    if (res.status >= 500 && res.status <= 599) {
-      console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'Result: down (5xx error)');
-      return "down";
-    }
-    
-    // Check for bad gateway, service unavailable, or gateway timeout
-    if (res.status === 502 || res.status === 503 || res.status === 504) {
-      console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'Result: down (gateway error)');
-      return "down";
-    }
-    
-    // Additional check: if we get a 200 but the response is from Caddy error page
-    // Check the Server header to see if it's a Caddy error response
-    const server = res.headers.get('Server');
-    if (res.status === 200 && server && server.toLowerCase().includes('caddy')) {
-      // For probe endpoints, we should not get a Caddy-served page
-      // This might indicate the upstream is down and Caddy is serving an error page
-      console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'but Server header indicates Caddy error page');
-      return "down";
-    }
-    
-    const status = res.ok ? "ok" : "down";
-    console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'Result:', status);
-    return status;
+    // With no-cors mode, we can only detect if the request completed successfully
+    // If we get here without an exception, the service is likely reachable
+    console.log('[DEBUG] probe response for', target, '- Request completed successfully');
+    return "ok";
   } catch (error) {
     console.log('[DEBUG] probe failed for', target, '- Error:', error.name, error.message);
     return "down";
