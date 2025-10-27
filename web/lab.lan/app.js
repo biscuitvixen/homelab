@@ -31,12 +31,34 @@ async function probe(target, ms = 2500) {
       signal: ctl.signal
     });
     
+    // Check for specific error status codes that indicate the service is down
+    if (res.status >= 500 && res.status <= 599) {
+      console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'Result: down (5xx error)');
+      return "down";
+    }
+    
+    // Check for bad gateway, service unavailable, or gateway timeout
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'Result: down (gateway error)');
+      return "down";
+    }
+    
+    // Additional check: if we get a 200 but the response is from Caddy error page
+    // Check the Server header to see if it's a Caddy error response
+    const server = res.headers.get('Server');
+    if (res.status === 200 && server && server.toLowerCase().includes('caddy')) {
+      // For probe endpoints, we should not get a Caddy-served page
+      // This might indicate the upstream is down and Caddy is serving an error page
+      console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'but Server header indicates Caddy error page');
+      return "down";
+    }
+    
     const status = res.ok ? "ok" : "down";
     console.log('[DEBUG] probe response for', target, '- Status:', res.status, 'Result:', status);
-    return status;  // 2xx => ok; anything else => down
+    return status;
   } catch (error) {
     console.log('[DEBUG] probe failed for', target, '- Error:', error.name, error.message);
-    return "down";                  // network/timeout => down
+    return "down";
   } finally {
     clearTimeout(t);
     console.log('[DEBUG] probe cleanup completed for:', target);
