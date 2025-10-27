@@ -2,12 +2,14 @@
   color-scheme: light dark;
   --fg: #1a1a1a; --bg: #fff; --muted: #6b7280;
   --card: #f5f5f7; --ring: rgba(0, 0, 0, 0.08);
+  --accent: #3b82f6; --accent-light: #dbeafe;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --fg: #e5e7eb; --bg: #0b0b0c; --muted: #9ca3af;
     --card: #141417; --ring: rgba(255,255,255,.08);
+    --accent: #60a5fa; --accent-light: #1e293b;
   }
 }
 
@@ -21,7 +23,8 @@ html, body {
 
 body {
   margin: 0; 
-  background: var(--bg); 
+  background: linear-gradient(135deg, var(--bg) 0%, var(--accent-light) 100%);
+  min-height: 100vh;
   color: var(--fg);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
   display: grid; 
@@ -39,7 +42,12 @@ header {
 
 h1 { 
   margin: 0 0 .3rem; 
-  font-size: clamp(1.6rem, 3.8vw, 2.2rem); 
+  font-size: clamp(1.6rem, 3.8vw, 2.2rem);
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
 }
 
 p.desc { 
@@ -62,13 +70,32 @@ p.desc {
   border: 1px solid var(--ring);
   border-radius: 18px; 
   padding: 1rem 1.1rem;
-  transition: transform .08s ease, box-shadow .08s ease, border-color .08s ease;
+  transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, var(--accent) 100%);
+  opacity: 0;
+  transition: opacity .2s ease;
+  z-index: -1;
 }
 
 .card:hover { 
-  transform: translateY(-2px); 
-  box-shadow: 0 8px 28px var(--ring); 
-  border-color: transparent; 
+  transform: translateY(-4px) scale(1.02); 
+  box-shadow: 0 12px 40px var(--ring); 
+  border-color: var(--accent);
+}
+
+.card:hover::before {
+  opacity: 0.05;
 }
 
 .card h3 { 
@@ -84,7 +111,12 @@ p.desc {
 footer { 
   margin-top: 2rem; 
   color: var(--muted); 
-  font-size: .9rem; 
+  font-size: .9rem;
+  text-align: center;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--card);
+  border: 1px solid var(--ring);
 }
 
 .row { 
