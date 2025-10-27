@@ -139,13 +139,14 @@ p.desc {
 }
 
 .card h3 { 
-  margin: 0 0 .35rem; 
+  margin: 0 0 .5rem; 
   font-size: 1.05rem; 
 }
 
 .muted { 
   color: var(--muted); 
-  font-size: .92rem; 
+  font-size: .92rem;
+  margin-top: 0.25rem;
 }
 
 footer { 
