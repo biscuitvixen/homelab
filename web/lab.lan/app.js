@@ -1,4 +1,4 @@
-const { createApp, reactive, onMounted } = Vue;
+const { createApp, ref, onMounted } = Vue;
 
 function hostFromUrl(u) {
   try { 
@@ -24,48 +24,39 @@ async function probe(url, ms = 2500) {
 
 createApp({
   setup() {
-    const state = reactive({ links: [] });
+    const links = ref([]);  
 
-    async function load() {
+    async function load(){
       try {
         console.log("Loading services.json...");
         const res = await fetch("services.json", { cache: "no-cache" });
         console.log("Response status:", res.status);
-        
-        if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-        }
-        
         const items = await res.json();
         console.log("Loaded items:", items);
-        
-        state.links = items.map(x => ({
-          ...x, 
-          host: hostFromUrl(x.href)
+
+        links.value = items.map(x => ({
+          ...x, host: hostFromUrl(x.href), statusClass: ""
         }));
-        
-        console.log("State links after mapping:", state.links);
+
         probeAll();
-      } catch (error) {
-        console.error("Failed to load services.json:", error);
-        // Fallback data for testing
-        state.links = [
-          { name: "AdGuard", href: "https://adguard.lan", subtitle: "DNS & filtering", host: "adguard.lan", statusClass: "" },
-          { name: "Home Assistant", href: "https://home.lan", subtitle: "Home automation", host: "home.lan", statusClass: "" },
-          { name: "TrueNAS", href: "https://truenas.lan", subtitle: "Storage", host: "truenas.lan", statusClass: "" },
-          { name: "Proxmox", href: "https://pve.lan", subtitle: "Virtualization", host: "pve.lan", statusClass: "" }
+      } catch (e) {
+        console.error("Failed to load services.json:", e);
+        links.value = [
+          { name:"AdGuard", href:"https://adguard.lan",  subtitle:"DNS & filtering", host:"adguard.lan",  statusClass:"" },
+          { name:"Home Assistant", href:"https://home.lan", subtitle:"Home automation", host:"home.lan", statusClass:"" },
+          { name:"TrueNAS", href:"https://truenas.lan", subtitle:"Storage", host:"truenas.lan", statusClass:"" },
+          { name:"Proxmox", href:"https://pve.lan", subtitle:"Virtualization", host:"pve.lan", statusClass:"" },
         ];
       }
     }
 
-    async function probeAll() {
-      for (const item of state.links) {
-        item.statusClass = ""; // reset
+    async function probeAll(){
+      for (const item of links.value) {
         item.statusClass = await probe(item.href);
       }
     }
 
     onMounted(load);
-    return { ...state, probeAll };
+    return { links, probeAll };
   }
 }).mount("#app");
