@@ -28,14 +28,26 @@ async function probe(target, ms = 2500) {
       method: "GET",
       cache: "no-store",
       redirect: "follow",
-      signal: ctl.signal,
-      mode: "no-cors"  // This will help avoid CORS issues but limits response info
+      signal: ctl.signal
     });
     
-    // With no-cors mode, we can only detect if the request completed successfully
-    // If we get here without an exception, the service is likely reachable
-    console.log('[DEBUG] probe response for', target, '- Request completed successfully');
-    return "ok";
+    console.log('[DEBUG] probe response for', target, '- Status:', res.status);
+    
+    // Check for specific error status codes that indicate the service is down
+    if (res.status >= 500 && res.status <= 599) {
+      console.log('[DEBUG] Result: down (5xx error)');
+      return "down";
+    }
+    
+    // Check for bad gateway, service unavailable, or gateway timeout
+    if (res.status === 502 || res.status === 503 || res.status === 504) {
+      console.log('[DEBUG] Result: down (gateway error)');
+      return "down";
+    }
+    
+    const status = res.ok ? "ok" : "down";
+    console.log('[DEBUG] Result:', status);
+    return status;
   } catch (error) {
     console.log('[DEBUG] probe failed for', target, '- Error:', error.name, error.message);
     return "down";
