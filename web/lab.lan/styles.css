@@ -86,16 +86,17 @@ p.desc {
   opacity: 0;
   transition: opacity .2s ease;
   z-index: -1;
+  border-radius: 18px;
 }
 
 .card:hover { 
   transform: translateY(-4px) scale(1.02); 
-  box-shadow: 0 12px 40px var(--ring); 
+  box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3), 0 0 0 1px var(--accent); 
   border-color: var(--accent);
 }
 
 .card:hover::before {
-  opacity: 0.05;
+  opacity: 0.02;
 }
 
 .card h3 { 
