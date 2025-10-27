@@ -17,7 +17,7 @@
       </header>
 
       <section class="grid">
-        <a v-for="link in links" :key="link.href" class="card" :href="link.href">
+        <a v-for="link in links" :key="link.href" class="card" :href="link.href" target="_blank">
           <div class="row">
             <h3>{{ link.name }}</h3>
             <span class="right">{{ link.host }}</span>
