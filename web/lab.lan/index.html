@@ -22,14 +22,9 @@
             <h3>{{ link.name }}</h3>
             <span class="right">{{ link.host }}</span>
           </div>
-          <div class="muted"><span class="status" :class="link.statusClass"></span>{{ link.subtitle }}</div>
+          <div class="muted">{{ link.subtitle }}</div>
         </a>
       </section>
-
-      <div class="controls">
-        <button @click="probeAll">Recheck status</button>
-        <span class="ts" v-if="lastChecked">Last checked: {{ lastChecked }}</span>
-      </div>
 
       <footer>Served by Caddy with internal TLS.</footer>
     </div>
