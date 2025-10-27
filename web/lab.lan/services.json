@@ -1,6 +1,6 @@
 [
-  { "name": "🛡️ AdGuard",        "href": "https://adguard.lan",  "subtitle": "DNS filtering & ad blocking" },
+  { "name": "🖥️ Proxmox",        "href": "https://pve.lan",      "subtitle": "Virtual machine management" },
   { "name": "🏠 Home Assistant", "href": "https://home.lan",     "subtitle": "Smart home automation" },
-  { "name": "📁 TrueNAS",        "href": "https://truenas.lan",  "subtitle": "Network attached storage" },
-  { "name": "🖥️ Proxmox",        "href": "https://pve.lan",      "subtitle": "Virtual machine management" }
+  { "name": "🛡️ AdGuard",        "href": "https://adguard.lan",  "subtitle": "DNS filtering & ad blocking" },
+  { "name": "📁 TrueNAS",        "href": "https://truenas.lan",  "subtitle": "Network attached storage" }
 ]
