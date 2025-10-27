@@ -26,13 +26,30 @@ createApp({
       }
     }
 
-    function downloadCertificate() {
-      const a = document.createElement('a');
-      a.href = 'skypaw.crt';
-      a.download = 'skypaw.crt';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    async function downloadCertificate() {
+      try {
+        const response = await fetch('skypaw.crt');
+        if (!response.ok) {
+          throw new Error('Certificate file not found');
+        }
+        
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'skypaw.crt';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        // Clean up the blob URL
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error downloading certificate:', error);
+        alert('Failed to download certificate. Please check if the file exists.');
+      }
     }
 
     onMounted(() => {
