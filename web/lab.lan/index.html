@@ -28,6 +28,7 @@
 
       <div class="controls">
         <button @click="probeAll">Recheck status</button>
+        <span class="ts" v-if="lastChecked">Last checked: {{ lastChecked }}</span>
       </div>
 
       <footer>Served by Caddy with internal TLS.</footer>

@@ -14,49 +14,53 @@ async function probe(url, ms = 2500) {
   const t = setTimeout(() => ctl.abort(), ms);
   try {
     await fetch(url, { method: "HEAD", mode: "no-cors", signal: ctl.signal });
-    clearTimeout(t);
     return "ok";
   } catch {
-    clearTimeout(t);
     return "down";
+  } finally {
+    clearTimeout(t);
   }
 }
 
 createApp({
   setup() {
-    const links = ref([]);  
+    const links = ref([]);
+    const lastChecked = ref("");
 
-    async function load(){
+    async function load() {
       try {
-        console.log("Loading services.json...");
         const res = await fetch("services.json", { cache: "no-cache" });
-        console.log("Response status:", res.status);
         const items = await res.json();
-        console.log("Loaded items:", items);
-
         links.value = items.map(x => ({
-          ...x, host: hostFromUrl(x.href), statusClass: ""
+          ...x,
+          host: hostFromUrl(x.href),
+          statusClass: "loading"        // start in loading state
         }));
-
         probeAll();
       } catch (e) {
         console.error("Failed to load services.json:", e);
         links.value = [
-          { name:"AdGuard", href:"https://adguard.lan",  subtitle:"DNS & filtering", host:"adguard.lan",  statusClass:"" },
-          { name:"Home Assistant", href:"https://home.lan", subtitle:"Home automation", host:"home.lan", statusClass:"" },
-          { name:"TrueNAS", href:"https://truenas.lan", subtitle:"Storage", host:"truenas.lan", statusClass:"" },
-          { name:"Proxmox", href:"https://pve.lan", subtitle:"Virtualization", host:"pve.lan", statusClass:"" },
+          { name:"AdGuard", href:"https://adguard.lan",  subtitle:"DNS & filtering", host:"adguard.lan",  statusClass:"loading" },
+          { name:"Home Assistant", href:"https://home.lan", subtitle:"Home automation", host:"home.lan", statusClass:"loading" },
+          { name:"TrueNAS", href:"https://truenas.lan", subtitle:"Storage", host:"truenas.lan", statusClass:"loading" },
+          { name:"Proxmox", href:"https://pve.lan", subtitle:"Virtualization", host:"pve.lan", statusClass:"loading" },
         ];
+        probeAll();
       }
     }
 
-    async function probeAll(){
+    async function probeAll() {
+      // show spinner while checking
+      for (const item of links.value) item.statusClass = "loading";
+
+      // probe sequentially (simple & avoids flooding); switch to Promise.all if you want parallel
       for (const item of links.value) {
-        item.statusClass = await probe(item.href);
+        item.statusClass = await probe(item.href);  // "ok" or "down"
       }
+      lastChecked.value = new Date().toLocaleTimeString();
     }
 
     onMounted(load);
-    return { links, probeAll };
+    return { links, lastChecked, probeAll };
   }
 }).mount("#app");

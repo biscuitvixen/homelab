@@ -137,3 +137,20 @@ button {
 button:hover { 
   background: var(--ring); 
 }
+
+/* timestamp style */
+.controls .ts {
+  margin-left: 1rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* spinner animation for status dot */
+@keyframes pulse {
+  0%   { transform: scale(0.8); opacity: .6; }
+  50%  { transform: scale(1.0); opacity: 1;  }
+  100% { transform: scale(0.8); opacity: .6; }
+}
+.status.loading {
+  animation: pulse 1s ease-in-out infinite;
+}
