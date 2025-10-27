@@ -8,21 +8,19 @@ function hostFromUrl(u) {
   }
 }
 
-async function probe(url, ms = 2500, probePath = "") {
-  const target = probePath ? new URL(probePath, url).toString() : url;
+async function probe(target, ms = 2500) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), ms);
   try {
-    await fetch(target, {
-      method: "GET",        // was HEAD; GET is more widely supported
-      mode: "no-cors",      // avoids CORS preflight and still tests reachability
-      cache: "no-store",    // don't reuse old results
+    const res = await fetch(target, {
+      method: "GET",
+      cache: "no-store",
       redirect: "follow",
       signal: ctl.signal
     });
-    return "ok";
+    return res.ok ? "ok" : "down";  // 2xx => ok; anything else => down
   } catch {
-    return "down";
+    return "down";                  // network/timeout => down
   } finally {
     clearTimeout(t);
   }
@@ -34,34 +32,19 @@ createApp({
     const lastChecked = ref("");
 
     async function load() {
-      try {
-        const res = await fetch("services.json", { cache: "no-cache" });
-        const items = await res.json();
-        links.value = items.map(x => ({
-          ...x,
-          host: hostFromUrl(x.href),
-          statusClass: "loading"        // start in loading state
-        }));
-        probeAll();
-      } catch (e) {
-        console.error("Failed to load services.json:", e);
-        links.value = [
-          { name:"AdGuard", href:"https://adguard.lan",  subtitle:"DNS & filtering", host:"adguard.lan",  statusClass:"loading" },
-          { name:"Home Assistant", href:"https://home.lan", subtitle:"Home automation", host:"home.lan", statusClass:"loading" },
-          { name:"TrueNAS", href:"https://truenas.lan", subtitle:"Storage", host:"truenas.lan", statusClass:"loading" },
-          { name:"Proxmox", href:"https://pve.lan", subtitle:"Virtualization", host:"pve.lan", statusClass:"loading" },
-        ];
-        probeAll();
-      }
+      const res = await fetch("services.json", { cache: "no-cache" });
+      const items = await res.json();
+      links.value = items.map(x => ({
+        ...x, host: hostFromUrl(x.href), statusClass: "loading"
+      }));
+      probeAll();
     }
 
     async function probeAll() {
-      // show spinner while checking
       for (const item of links.value) item.statusClass = "loading";
-
-      // probe sequentially (simple & avoids flooding); switch to Promise.all if you want parallel
       for (const item of links.value) {
-        item.statusClass = await probe(item.href);  // "ok" or "down"
+        const target = item.probe || item.href;  // prefer same-origin probe
+        item.statusClass = await probe(target);
       }
       lastChecked.value = new Date().toLocaleTimeString();
     }

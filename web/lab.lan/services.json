@@ -1,6 +1,6 @@
 [
-  { "name": "AdGuard",        "href": "https://adguard.lan",  "subtitle": "DNS & filtering",     "statusClass": "unknown" },
-  { "name": "Home Assistant", "href": "https://home.lan",     "subtitle": "Home automation",     "statusClass": "unknown" },
-  { "name": "TrueNAS",        "href": "https://truenas.lan",  "subtitle": "Storage",             "statusClass": "unknown" },
-  { "name": "Proxmox",        "href": "https://pve.lan",      "subtitle": "Virtualization",      "statusClass": "unknown" }
+  { "name": "AdGuard",        "href": "https://adguard.lan",  "subtitle": "DNS & filtering", "probe": "/probe/adguard" },
+  { "name": "Home Assistant", "href": "https://home.lan",     "subtitle": "Home automation", "probe": "/probe/home" },
+  { "name": "TrueNAS",        "href": "https://truenas.lan",  "subtitle": "Storage",         "probe": "/probe/truenas" },
+  { "name": "Proxmox",        "href": "https://pve.lan",      "subtitle": "Virtualization",  "probe": "/probe/pve" }
 ]
