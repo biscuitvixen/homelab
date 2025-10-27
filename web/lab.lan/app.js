@@ -8,12 +8,18 @@ function hostFromUrl(u) {
   }
 }
 
-async function probe(url, ms = 2500) {
-  // Best-effort: cross-origin HEAD with timeout; success => green
+async function probe(url, ms = 2500, probePath = "") {
+  const target = probePath ? new URL(probePath, url).toString() : url;
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), ms);
   try {
-    await fetch(url, { method: "HEAD", mode: "no-cors", signal: ctl.signal });
+    await fetch(target, {
+      method: "GET",        // was HEAD; GET is more widely supported
+      mode: "no-cors",      // avoids CORS preflight and still tests reachability
+      cache: "no-store",    // don't reuse old results
+      redirect: "follow",
+      signal: ctl.signal
+    });
     return "ok";
   } catch {
     return "down";
