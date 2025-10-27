@@ -26,10 +26,22 @@ createApp({
       }
     }
 
+    function downloadCertificate() {
+      const a = document.createElement('a');
+      a.href = 'skypaw.crt';
+      a.download = 'skypaw.crt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     onMounted(() => {
       load();
     });
     
-    return { links };
+    return { 
+      links,
+      downloadCertificate 
+    };
   }
 }).mount("#app");
