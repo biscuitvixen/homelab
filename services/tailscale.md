@@ -1,13 +1,13 @@
 # Tailscale VPN Setup
 
-This guide provides instructions for running Tailscale using the dual-configuration setup in `services/tailscale.yml`. The configuration supports both server deployments and Raspberry Pi exit node setups.
+This guide provides instructions for running Tailscale using the configuration in `services/tailscale.yml`. The single service definition uses the `${BASE}` environment variable to support both server deployments and Raspberry Pi exit node setups.
 
-## Configuration Options
+## Configuration Overview
 
-This setup includes two Tailscale configurations:
-
-- **`tailscale-server`** (`serv` profile): Standard Tailscale client for server deployments
-- **`tailscale-pi`** (`pi` profile): Exit node configuration for Raspberry Pi with route advertising
+The Tailscale service uses environment variables to configure its behavior:
+- **`TS_HOSTNAME`**: Sets the device name in your Tailscale network
+- **`TS_ARGS`**: Controls Tailscale features like SSH access, exit node, and route advertising
+- **`BASE`**: Determines volume mount paths i.e. NFS mount for server and local stateful data for Pi
 
 ## Prerequisites
 
@@ -32,15 +32,16 @@ Create a `.env` file in the homelab root directory with your Tailscale configura
 ```bash
 TS_AUTHKEY=your_tailscale_auth_key_here
 TS_HOSTNAME=your-server-name
-TS_ARGS=--ssh  # Optional: enable SSH access
+TS_ARGS=--ssh  # Optional: enable SSH access over Tailscale
 BASE=/path/to/your/data  # Base path for data storage
-TS_STATE_SUFFIX=primary  # Optional: state directory suffix
 ```
 
 **For Pi Profile (`pi`):**
 ```bash
 TS_AUTHKEY=your_tailscale_auth_key_here
 TS_HOSTNAME=raspberry-pi-exit-node
+TS_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24
+BASE=  # Empty string for direct host paths
 ```
 
 To get an auth key:
@@ -89,17 +90,17 @@ On your phone or other devices with the Tailscale app:
 
 ## What Each Configuration Does
 
-### Server Profile (`tailscale-server`)
+### Server Profile (`serv`)
 - **Standard Client**: Connects your server to the Tailscale network
 - **Configurable Storage**: Uses `${BASE}` path for flexible data storage
 - **Custom Arguments**: Supports additional Tailscale arguments via `${TS_ARGS}`
-- **User Permissions**: Runs with specific user/group (1001:3001)
+- **Example**: `BASE=/mnt/storage` and `TS_ARGS=--ssh`
 
-### Pi Profile (`tailscale-pi`) 
+### Pi Profile (`pi`) 
 - **Exit Node**: Routes all internet traffic from your devices through the Raspberry Pi
 - **Subnet Routes**: Allows access to your local network (192.168.0.0/24) from remote devices
-- **Direct Storage**: Uses host paths `/etc/tailscale` for simpler setup
-- **DNS**: Uses Tailscale's DNS settings for better integration
+- **Direct Storage**: Uses empty `BASE=` for direct host paths (`/var/lib/tailscale`, `/etc/tailscale`)
+- **Example**: `BASE=` and `TS_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24`
 
 ## Troubleshooting
 
@@ -111,26 +112,14 @@ cat /proc/sys/net/ipv4/ip_forward
 
 ### View Container Logs
 
-**For Server Profile:**
 ```bash
 docker logs -f tailscale
 ```
 
-**For Pi Profile:**
-```bash
-docker logs -f tailscale-pi
-```
-
 ### Verify Tailscale Status
 
-**For Server Profile:**
 ```bash
 docker exec tailscale tailscale status
-```
-
-**For Pi Profile:**
-```bash
-docker exec tailscale-pi tailscale status
 ```
 
 ### Test Connectivity

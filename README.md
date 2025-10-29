@@ -54,12 +54,12 @@ This homelab uses Docker Compose profiles to support different deployment scenar
 - **`serv`** - Full server deployment (Proxmox LXC)
   - Includes all core services
   - Uses `${BASE}` path for flexible storage locations
-  - Tailscale with custom routing arguments
+  - Tailscale VPN with custom arguments
 
 - **`pi`** - Raspberry Pi deployment
-  - Tailscale exit node configuration
-  - Advertises local network routes (192.168.0.0/24)
-  - Uses direct host paths for simpler setup
+  - Tailscale VPN (typically configured as exit node)
+  - Uses `${BASE}` path (set to empty for direct host paths)
+  - Advertises local network routes via `TS_ARGS`
 
 - **`dns`** - DNS services only
   - AdGuard Home
@@ -79,8 +79,8 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - Automatic certificate management
 
 - **Tailscale** - Zero-config VPN
-  - **Server mode**: Standard client with customizable routes
-  - **Pi mode**: Exit node with subnet routing for remote LAN access
+  - Uses `${BASE}` variable for volume paths
+  - Configure via `TS_ARGS` environment variable for SSH access, exit nodes, and route advertising
   - See [services/tailscale.md](services/tailscale.md) for detailed setup
 
 ### DNS & Security
@@ -155,10 +155,11 @@ nano .env
 
 Required variables:
 - `TZ` - Your timezone (e.g., `Europe/London`)
-- `BASE` - Base path for data storage (e.g., `/mnt/storage`)
+- `BASE` - Base path for data storage (e.g., `/mnt/storage` for server, empty string for Pi)
 - `PUID`/`PGID` - User/group IDs for file permissions
 - `TS_AUTHKEY` - Tailscale authentication key
 - `TS_HOSTNAME` - Hostname for your Tailscale node
+- `TS_ARGS` - Tailscale arguments (e.g., `--ssh --advertise-exit-node --advertise-routes=192.168.0.0/24`)
 
 ### 3. Deploy Services
 
