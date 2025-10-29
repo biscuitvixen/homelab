@@ -6,17 +6,11 @@ services:
   #   profiles: ["serv"]
   #   user: "1001:3001"
 
-  tailscale-server:
+  tailscale:
     extends:
       file: ./services/tailscale.yml
-      service: tailscale-server
-    profiles: ["serv"]
-
-  tailscale-pi:
-    extends:
-      file: ./services/tailscale.yml
-      service: tailscale-pi
-    profiles: ["pi"]
+      service: tailscale
+    profiles: ["serv", "pi"]
 
   unbound:
     extends:

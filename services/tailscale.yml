@@ -1,45 +1,27 @@
-# Base template for tailscale services using YAML anchors
-# The 'x-' prefix tells Docker Compose to ignore this as a service definition
-# and treat it as a reusable template instead
-x-tailscale-base: &tailscale-base
-  image: tailscale/tailscale:stable
-  network_mode: "host"                 # use host net stack
-  cap_add:
-    - NET_ADMIN                        # allow route/iptables tweaks
-    - NET_RAW                          # allow raw sockets (ping)
-  devices:
-    - /dev/net/tun:/dev/net/tun        # tunnel device
-  environment:
-    - TS_AUTHKEY=${TS_AUTHKEY}
-    - TS_HOSTNAME=${TS_HOSTNAME}
-    - TS_ACCEPT_DNS=true
-    - TS_EXTRA_ARGS=${TS_ARGS}         # e.g: --advertise-exit-node --advertise-routes=192.168.0.0/24
-    - TS_STATE_DIR=/var/lib/tailscale  # Use persistent state directory
-  restart: unless-stopped
-  healthcheck:
-    test: ["CMD", "tailscale", "status", "--peers=false"]
-    interval: 60s
-    timeout: 10s
-    retries: 3
-    start_period: 60s
-
 services:
-  tailscale-server:
-    # Inherit all properties from the base template using YAML merge syntax
-    <<: *tailscale-base
+  tailscale:
+    image: tailscale/tailscale:stable
     container_name: tailscale
-    # Server-specific volumes with BASE path for persistence
+    network_mode: "host"                 # use host net stack
+    cap_add:
+      - NET_ADMIN                        # allow route/iptables tweaks
+      - NET_RAW                          # allow raw sockets (ping)
+    devices:
+      - /dev/net/tun:/dev/net/tun        # tunnel device
+    environment:
+      - TS_AUTHKEY=${TS_AUTHKEY}
+      - TS_HOSTNAME=${TS_HOSTNAME}
+      - TS_ACCEPT_DNS=true
+      - TS_EXTRA_ARGS=${TS_ARGS}         # e.g: --ssh --advertise-exit-node --advertise-routes=192.168.0.0/24
+      - TS_STATE_DIR=/var/lib/tailscale  # Use persistent state directory
     volumes:
       - /var/run/tailscale:/var/run/tailscale
       - ${BASE}/appdata/tailscale:/var/lib/tailscale
       - ${BASE}/configs/tailscale:/etc/tailscale
-
-  tailscale-pi:
-    # Inherit all properties from the base template using YAML merge syntax
-    <<: *tailscale-base
-    container_name: tailscale-pi
-    # Pi-specific volumes using local paths (no BASE variable)
-    volumes:
-      - /var/run/tailscale:/var/run/tailscale
-      - /var/lib/tailscale:/var/lib/tailscale
-      - /etc/tailscale:/etc/tailscale
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "tailscale", "status", "--peers=false"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
