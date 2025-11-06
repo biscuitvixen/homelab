@@ -1,0 +1,20 @@
+services:
+  matter-server:
+    image: ghcr.io/home-assistant-libs/python-matter-server:stable
+    container_name: matter-server
+    restart: unless-stopped
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - ${BASE}/appdata/matter-server:/data
+      - /run/dbus:/run/dbus:ro
+    network_mode: host
+    environment:
+      - MATTER_SERVER_STORAGE_PATH=/data
+      - MATTER_SERVER_LOG_LEVEL=info
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import socket; s=socket.socket(); s.connect((\"127.0.0.1\", 5580)); s.close()'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
