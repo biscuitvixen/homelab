@@ -1,6 +1,7 @@
 services:
   unbound:
     image: mvance/unbound:latest
+    platform: ${PLATFORM}
     container_name: unbound
     # Expose DNS to the LAN host
     # Ports not published as unbound is running internal-only
