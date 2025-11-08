@@ -16,7 +16,7 @@ services:
     extends:
       file: ./services/unbound.yml
       service: unbound
-    profiles: ["serv", "dns"]
+    profiles: ["serv", "pi", "dns"]
     networks:
       - homelab_network
 
