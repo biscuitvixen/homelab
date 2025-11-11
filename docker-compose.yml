@@ -61,7 +61,7 @@ services:
     extends:
       file: ./services/watchtower.yml
       service: watchtower
-    profiles: ["serv"]
+    profiles: ["serv", "pi"]
 
   # portainer:
   #   extends:
