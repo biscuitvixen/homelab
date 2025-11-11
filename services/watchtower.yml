@@ -1,6 +1,6 @@
 services:
   watchtower:
-    image: containrrr/watchtower
+    image: nickfedor/watchtower
     container_name: watchtower
     volumes:
       # Bind mount docker to allow it to access the Docker daemon socket
