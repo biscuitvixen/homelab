@@ -57,6 +57,14 @@ services:
       service: matter-server
     profiles: ["serv", "iot"]
 
+  mealie:
+    extends:
+      file: ./services/mealie.yml
+      service: mealie
+    profiles: ["serv"]
+    networks:
+      - homelab_network
+
   watchtower:
     extends:
       file: ./services/watchtower.yml
@@ -82,3 +90,4 @@ volumes:
   caddy_config:
   mosquitto_data:
   mosquitto_logs:
+  mealie_data:

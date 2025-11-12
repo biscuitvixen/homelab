@@ -1,0 +1,28 @@
+services:
+  mealie:
+    image: ghcr.io/mealie-recipes/mealie:latest
+    container_name: mealie
+    restart: unless-stopped
+    # Remove port publishing - only accessible via Caddy
+    # ports:
+    #   - "9925:9000"
+    environment:
+      TZ: ${TZ}
+      
+      # Application Settings
+      ALLOW_SIGNUP: "true"
+      MAX_WORKERS: 1
+      WEB_CONCURRENCY: 1
+      BASE_URL: https://mealie.lan
+      
+      # Database Settings (using SQLite by default)
+      DB_ENGINE: sqlite
+      
+    volumes:
+      - ${BASE}/appdata/mealie:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/api/app/about"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

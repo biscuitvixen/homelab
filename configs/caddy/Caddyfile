@@ -39,6 +39,11 @@ pve.lan {
   }
 }
 
+mealie.lan {
+  import tls_internal
+  reverse_proxy mealie:9000
+}
+
 # A landing page at https://lab.lan/
 lab.lan {
 	import tls_internal

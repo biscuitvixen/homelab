@@ -3,5 +3,6 @@
   { "name": "🏠 Home Assistant", "href": "https://home.lan",     "subtitle": "Smart home automation" },
   { "name": "🛡️ AdGuard",        "href": "https://adguard.lan",  "subtitle": "DNS filtering & ad blocking" },
   { "name": "📁 TrueNAS",        "href": "https://truenas.lan",  "subtitle": "Network attached storage" },
-  { "name": "🌐 Router",         "href": "http://192.168.0.1",   "subtitle": "Network router configuration" }
+  { "name": "🍽️ Mealie",         "href": "https://mealie.lan",   "subtitle": "Recipe management & meal planning" },
+  { "name": "� Router",         "href": "http://192.168.0.1",   "subtitle": "Network router configuration" }
 ]
