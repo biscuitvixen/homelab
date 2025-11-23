@@ -9,7 +9,7 @@ services:
     devices:
       - /dev/net/tun:/dev/net/tun        # tunnel device
     environment:
-      - TS_AUTHKEY=${TS_AUTHKEY}
+#      - TS_AUTHKEY=${TS_AUTHKEY}        # removed - use TS_AUTHKEY as env variable in up command
       - TS_HOSTNAME=${TS_HOSTNAME}
       - TS_ACCEPT_DNS=true
       - TS_EXTRA_ARGS=${TS_ARGS}         # e.g: --ssh --advertise-exit-node --advertise-routes=192.168.0.0/24
