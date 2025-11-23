@@ -22,7 +22,7 @@ services:
     volumes:
       - ${BASE}/appdata/mealie:/app/data
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:9000/api/app/about"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/api/app/about')"]
       interval: 30s
       timeout: 10s
       retries: 3
