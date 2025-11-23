@@ -4,8 +4,9 @@ services:
     container_name: mealie
     restart: unless-stopped
     # Remove port publishing - only accessible via Caddy
-    # ports:
-    #   - "9925:9000"
+    # Re-added for now
+    ports:
+      - "9925:9000"
     environment:
       TZ: ${TZ}
       
