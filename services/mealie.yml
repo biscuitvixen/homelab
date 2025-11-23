@@ -6,7 +6,7 @@ services:
     # Remove port publishing - only accessible via Caddy
     # Re-added for now
     ports:
-      - "9925:9000"
+      - "9000:9000"
     environment:
       TZ: ${TZ}
       
