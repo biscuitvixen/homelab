@@ -51,11 +51,11 @@ services:
       service: mosquitto
     profiles: ["serv", "iot"]
 
-  matter-server:
-    extends:
-      file: ./services/matter.yml
-      service: matter-server
-    profiles: ["serv", "iot"]
+#  matter-server:
+#    extends:
+#      file: ./services/matter.yml
+#      service: matter-server
+#    profiles: ["serv", "iot"]
 
   mealie:
     extends:
