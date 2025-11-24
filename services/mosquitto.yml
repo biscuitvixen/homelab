@@ -1,3 +1,7 @@
+# Logs are published to MQTT topics for monitoring:
+# - Subscribe to $SYS/broker/log/# in Home Assistant to view all logs
+# - Individual topics: $SYS/broker/log/E (errors), /W (warnings), /N (notices), /I (info)
+# - Docker logs available via: docker logs mosquitto
 services:
   mosquitto:
     image: eclipse-mosquitto:latest
@@ -7,8 +11,7 @@ services:
       - "9001:9001"
     volumes:
       - ../configs/mosquitto:/mosquitto/config:ro
-      - mosquitto_data:/mosquitto/data
-      - mosquitto_logs:/mosquitto/log
+      - ${BASE}/appdata/mosquitto/data:/mosquitto/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/broker/version' -C 1 -W 15 >/dev/null 2>&1 || exit 1"]
