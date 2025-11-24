@@ -14,5 +14,11 @@ services:
     command: >
       -s "storage;/mount;yes;no;no;${SAMBA_USER}"
       -u "${SAMBA_USER};${SAMBA_PASSWORD}"
+    healthcheck:
+      test: ["CMD-SHELL", "smbclient -L localhost -N || exit 1"]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-30s}
     networks:
       - asteria_network

@@ -23,7 +23,7 @@ services:
       - ${BASE}/appdata/mealie:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/api/app/about')"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-40s}
