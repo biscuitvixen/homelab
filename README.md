@@ -247,8 +247,26 @@ All services use internal TLS via Caddy:
 - **Dashboard**: https://lab.lan
 - **AdGuard**: https://adguard.lan
 - **Home Assistant**: https://home.lan
+- **Mealie**: https://mealie.lan
+- **Vaultwarden**: https://vault.lan
+- **Atuin**: https://atuin.lan
 - **Proxmox**: https://pve.lan
 - **TrueNAS**: https://truenas.lan
+
+## Port Reference
+
+| Service | Host Port | Container Port | Protocol | Notes |
+|---|---|---|---|---|
+| Caddy | 80, 443 | 80, 443 | TCP | Reverse proxy & TLS termination |
+| AdGuard | 53 | 53 | TCP/UDP | DNS |
+| Unbound | 66 | 53 | TCP/UDP | Upstream recursive DNS |
+| Mosquitto | 1883, 9001 | 1883, 9001 | TCP | MQTT & WebSocket |
+| Mealie | 9000 | 9000 | TCP | Recipe manager |
+| Atuin | 8888 | 8888 | TCP | Shell history sync API |
+| Vaultwarden | 8080 | 80 | TCP | Password manager & web vault |
+| Home Assistant | 8123 | — | TCP | Host networking |
+| Tailscale | — | — | — | Host networking |
+| Watchtower | — | — | — | No published ports |
 
 ## Maintenance
 
@@ -269,6 +287,12 @@ Restores from the latest backup.
 ./scripts/update.sh
 ```
 Pulls latest images and restarts services.
+
+### Reload Caddy
+After editing the Caddyfile, reload without downtime:
+```bash
+docker compose --profile serv exec caddy caddy reload --config /etc/caddy/Caddyfile
+```
 
 ## Tailscale Setup
 
