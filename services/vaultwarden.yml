@@ -10,6 +10,8 @@ services:
       DOMAIN: "${VAULTWARDEN_DOMAIN:-https://vault.lan}"
       # Disable signups after creating your account
       SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS_ALLOWED:-true}"
+      # Set a long random string to enable the admin panel at /admin
+      ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}"
     volumes:
       - ${BASE}/appdata/vaultwarden:/data
     healthcheck:
