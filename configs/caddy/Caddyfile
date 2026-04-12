@@ -44,6 +44,16 @@ mealie.lan {
   reverse_proxy mealie:9000
 }
 
+vault.lan {
+  import tls_internal
+  reverse_proxy vaultwarden:80
+}
+
+atuin.lan {
+  import tls_internal
+  reverse_proxy atuin:8888
+}
+
 # A landing page at https://lab.lan/
 lab.lan {
 	import tls_internal
