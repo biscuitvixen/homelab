@@ -15,7 +15,7 @@ services:
     volumes:
       - ${BASE}/appdata/vaultwarden:/data
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80/alive || exit 1"]
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:80/alive || exit 1"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: ${HEALTHCHECK_TIMEOUT:-10s}
       retries: ${HEALTHCHECK_RETRIES:-3}
