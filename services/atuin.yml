@@ -1,0 +1,24 @@
+services:
+  atuin:
+    image: ghcr.io/atuinsh/atuin:latest
+    container_name: atuin
+    restart: unless-stopped
+    command: server start
+    ports:
+      - "${ATUIN_PORT:-8888}:8888"
+    environment:
+      TZ: ${TZ}
+      ATUIN_HOST: "0.0.0.0"
+      ATUIN_PORT: "8888"
+      # Disable registration after creating your account
+      ATUIN_OPEN_REGISTRATION: "${ATUIN_OPEN_REGISTRATION:-true}"
+      ATUIN_DB_URI: "sqlite:///data/atuin.db"
+      ATUIN_MAX_HISTORY_LENGTH: "${ATUIN_MAX_HISTORY_LENGTH:-8192}"
+    volumes:
+      - ${BASE}/appdata/atuin:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:8888/healthz || exit 1"]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-10s}

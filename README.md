@@ -17,9 +17,11 @@ homelab/
 │   ├── homeassistant.yml      # Home automation platform
 │   ├── homeassistant.md       # HA reverse proxy configuration
 │   ├── mosquitto.yml          # MQTT broker for IoT
+│   ├── atuin.yml              # Shell history sync server
 │   ├── portainer.yml          # Docker container management UI
 │   ├── samba.yml              # Network file sharing (optional)
 │   ├── tailscale.yml          # VPN with dual-mode support
+│   ├── vaultwarden.yml        # Bitwarden-compatible password manager
 │   ├── tailscale.md           # Detailed Tailscale setup guide
 │   ├── unbound.yml            # Recursive DNS resolver
 │   └── watchtower.yml         # Automatic container updates
@@ -103,6 +105,19 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - Supports WebSockets (port 9001)
   - Anonymous access enabled (configure as needed)
 
+### Utilities
+- **Atuin** - Shell history sync server
+  - SQLite-backed sync for shell history across machines
+  - Optionally supports PostgreSQL backend for higher concurrency (set `ATUIN_DB_URI` to a Postgres connection string)
+  - API server on port 8888
+  - Disable open registration after account creation
+
+- **Vaultwarden** - Self-hosted password manager (Bitwarden-compatible)
+  - Full Bitwarden client compatibility (browser, mobile, desktop)
+  - SQLite-backed, lightweight
+  - Web vault UI included
+  - Disable signups after account creation
+
 ### Management & Monitoring
 - **Watchtower** - Automatic container updates
   - Runs daily at 5 AM
@@ -132,6 +147,10 @@ Track the working status of each service:
 ### IoT & Home Automation
 - [x] **Home Assistant** - Home automation
 - [x] **Mosquitto** - MQTT broker
+
+### Utilities
+- [x] **Atuin** - Shell history sync
+- [x] **Vaultwarden** - Password manager
 
 ### Infrastructure
 - ~~**Portainer** - Container management~~
@@ -269,6 +288,8 @@ Most services include health checks for monitoring:
 - **Caddy**: Configuration validation
 - **Home Assistant**: HTTP endpoint check
 - **Tailscale**: Peer status check
+- **Atuin**: HTTP check on `/healthz`
+- **Vaultwarden**: HTTP check on `/alive` (verifies database)
 
 View health status:
 ```bash
@@ -282,6 +303,8 @@ docker compose ps
 - AdGuard filters DNS queries and blocks ads/trackers
 - DNSSEC validation enabled in Unbound
 - Home Assistant configured to trust reverse proxy
+- Vaultwarden signups disabled after initial setup
+- Atuin open registration disabled after initial setup
 
 ## Troubleshooting
 

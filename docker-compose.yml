@@ -57,6 +57,22 @@ services:
 #      service: matter-server
 #    profiles: ["serv", "iot"]
 
+  atuin:
+    extends:
+      file: ./services/atuin.yml
+      service: atuin
+    profiles: ["serv"]
+    networks:
+      - homelab_network
+
+  vaultwarden:
+    extends:
+      file: ./services/vaultwarden.yml
+      service: vaultwarden
+    profiles: ["serv"]
+    networks:
+      - homelab_network
+
   mealie:
     extends:
       file: ./services/mealie.yml
