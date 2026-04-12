@@ -1,0 +1,22 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: unless-stopped
+    ports:
+      - "${VAULTWARDEN_PORT:-8080}:80"
+    environment:
+      TZ: ${TZ}
+      DOMAIN: "${VAULTWARDEN_DOMAIN:-https://vault.lan}"
+      # Disable signups after creating your account
+      SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS_ALLOWED:-true}"
+      # Set a long random string to enable the admin panel at /admin
+      ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}"
+    volumes:
+      - ${BASE}/appdata/vaultwarden:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://127.0.0.1:80/alive || exit 1"]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-10s}
