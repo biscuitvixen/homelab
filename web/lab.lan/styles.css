@@ -17,13 +17,13 @@
   box-sizing: border-box; 
 }
 
-html, body { 
-  height: 100%; 
+html {
+  min-height: 100%;
+  background: linear-gradient(135deg, var(--bg) 0%, var(--accent-light) 100%);
 }
 
 body {
   margin: 0; 
-  background: linear-gradient(135deg, var(--bg) 0%, var(--accent-light) 100%);
   min-height: 100vh;
   color: var(--fg);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
@@ -33,7 +33,8 @@ body {
 
 .container { 
   width: min(960px, 92vw); 
-  margin: 3rem auto; 
+  margin: 3rem auto 0; 
+  padding-bottom: 2rem;
 }
 
 header { 
