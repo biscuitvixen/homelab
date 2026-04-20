@@ -16,10 +16,74 @@
           <h1>Homelab Dashboard</h1>
           <p class="desc">✨ Quick access to your local services</p>
         </div>
-        <button @click="downloadCertificate" class="cert-button">
-          🔒 Download Certificate
-        </button>
+        <div class="cert-buttons">
+          <button @click="downloadCertificate" class="cert-button">
+            🔒 Download Certificate
+          </button>
+          <button @click="showCertModal = true" class="cert-button cert-button--outline">
+            ?
+          </button>
+        </div>
       </header>
+
+      <!-- Certificate install modal -->
+      <teleport to="body">
+        <div v-if="showCertModal" class="modal-backdrop" @click.self="showCertModal = false">
+          <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+            <div class="modal-header">
+              <h2 id="modal-title">Installing the CA Certificate</h2>
+              <button class="modal-close" @click="showCertModal = false" aria-label="Close">✕</button>
+            </div>
+            <div class="modal-body">
+              <p class="modal-intro">Download <code>skypaw.crt</code> using the button above, then follow the steps for your OS. You only need to do this once — it covers all services.</p>
+
+              <div class="install-grid">
+                <div class="install-card">
+                  <h3>🐧 Arch Linux</h3>
+                  <pre><code>sudo cp skypaw.crt /etc/ca-certificates/trust-source/anchors/
+sudo update-ca-trust</code></pre>
+                </div>
+                <div class="install-card">
+                  <h3>🐧 Ubuntu / Debian</h3>
+                  <pre><code>sudo cp skypaw.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates</code></pre>
+                </div>
+                <div class="install-card">
+                  <h3>🍓 Raspberry Pi OS</h3>
+                  <pre><code>sudo cp skypaw.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates</code></pre>
+                </div>
+                <div class="install-card">
+                  <h3>🎩 Fedora / RHEL</h3>
+                  <pre><code>sudo cp skypaw.crt /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust extract</code></pre>
+                </div>
+                <div class="install-card">
+                  <h3>❄️ NixOS</h3>
+                  <pre><code># configuration.nix
+security.pki.certificateFiles = [
+  /path/to/skypaw.crt
+];</code></pre>
+                  <p class="install-note">Then <code>sudo nixos-rebuild switch</code></p>
+                </div>
+                <div class="install-card">
+                  <h3>🦊 Firefox</h3>
+                  <p class="install-note">Firefox uses its own certificate store independent of the OS.</p>
+                  <ol class="install-steps">
+                    <li>Open <strong>Settings → Privacy &amp; Security</strong></li>
+                    <li>Scroll to <strong>Certificates</strong> → click <strong>View Certificates…</strong></li>
+                    <li>Go to the <strong>Authorities</strong> tab → click <strong>Import…</strong></li>
+                    <li>Select <code>skypaw.crt</code></li>
+                    <li>Check <em>"Trust this CA to identify websites"</em> → OK</li>
+                  </ol>
+                </div>
+              </div>
+
+              <p class="modal-verify">Verify with: <code>curl https://adguard.lan</code> — should return a response, not an SSL error.</p>
+            </div>
+          </div>
+        </div>
+      </teleport>
 
       <section class="grid">
         <a v-for="link in links" :key="link.href" class="card" :href="link.href" target="_blank">

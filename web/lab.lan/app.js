@@ -12,6 +12,7 @@ createApp({
   setup() {
     const links = ref([]);
     const tableRows = ref([]);
+    const showCertModal = ref(false);
 
     async function load() {
       try {
@@ -70,6 +71,7 @@ createApp({
     return { 
       links,
       tableRows,
+      showCertModal,
       downloadCertificate 
     };
   }
