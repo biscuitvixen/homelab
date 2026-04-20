@@ -11,6 +11,7 @@ function hostFromUrl(u) {
 createApp({
   setup() {
     const links = ref([]);
+    const tableRows = ref([]);
 
     async function load() {
       try {
@@ -23,6 +24,15 @@ createApp({
         }));
       } catch (error) {
         console.error('Error loading services:', error);
+      }
+    }
+
+    async function loadTable() {
+      try {
+        const res = await fetch("services-table.json", { cache: "no-cache" });
+        tableRows.value = await res.json();
+      } catch (error) {
+        console.error('Error loading services table:', error);
       }
     }
 
@@ -54,10 +64,12 @@ createApp({
 
     onMounted(() => {
       load();
+      loadTable();
     });
     
     return { 
       links,
+      tableRows,
       downloadCertificate 
     };
   }

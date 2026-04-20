@@ -31,6 +31,30 @@
         </a>
       </section>
 
+      <section class="table-section">
+        <h2 class="table-heading">All Services</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Service</th>
+                <th>Address</th>
+                <th>Port(s)</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="svc in tableRows" :key="svc.name">
+                <td>{{ svc.name }}</td>
+                <td class="mono">{{ svc.address }}</td>
+                <td class="mono">{{ svc.ports }}</td>
+                <td class="muted">{{ svc.notes }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <footer>🔒 Secured by Caddy with internal TLS 🚀</footer>
     </div>
 

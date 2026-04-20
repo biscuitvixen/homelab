@@ -1,0 +1,15 @@
+[
+  { "name": "Caddy",          "address": "host",         "ports": "80, 443",    "notes": "Reverse proxy · HTTPS termination" },
+  { "name": "AdGuard Home",   "address": "host",         "ports": "53",         "notes": "DNS filtering · TCP/UDP" },
+  { "name": "Unbound",        "address": "host",         "ports": "66",         "notes": "Recursive DNS resolver · TCP/UDP" },
+  { "name": "Home Assistant", "address": "192.168.0.12", "ports": "8123",       "notes": "Smart home hub" },
+  { "name": "Mosquitto",      "address": "host",         "ports": "1883, 9001", "notes": "MQTT broker · WebSocket" },
+  { "name": "Mealie",         "address": "host",         "ports": "9000",       "notes": "Recipe & meal planning" },
+  { "name": "Vaultwarden",    "address": "host",         "ports": "8080",       "notes": "Password manager" },
+  { "name": "Atuin",          "address": "host",         "ports": "8888",       "notes": "Shell history sync" },
+  { "name": "Tailscale",      "address": "host",         "ports": "—",          "notes": "VPN · host network mode" },
+  { "name": "Watchtower",     "address": "—",            "ports": "—",          "notes": "Container auto-updater" },
+  { "name": "Proxmox",        "address": "192.168.0.10", "ports": "8006",       "notes": "Hypervisor · HTTPS" },
+  { "name": "TrueNAS",        "address": "192.168.0.11", "ports": "443",        "notes": "Network attached storage · HTTPS" },
+  { "name": "Router",         "address": "192.168.0.1",  "ports": "80",         "notes": "Network gateway" }
+]
