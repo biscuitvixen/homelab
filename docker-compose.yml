@@ -87,6 +87,25 @@ services:
       service: watchtower
     profiles: ["serv", "pi"]
 
+  scarlett-lavalink:
+    extends:
+      file: ./services/scarlett.yml
+      service: scarlett-lavalink
+    profiles: ["serv", "ai"]
+    networks:
+      - homelab_network
+
+  scarlett-bot:
+    extends:
+      file: ./services/scarlett.yml
+      service: scarlett-bot
+    depends_on:
+      scarlett-lavalink:
+        condition: service_healthy
+    profiles: ["serv", "ai"]
+    networks:
+      - homelab_network
+
   # portainer:
   #   extends:
   #     file: ./services/portainer.yml
@@ -105,3 +124,5 @@ volumes:
   # Ephemeral volume for Caddy's config persistence
   caddy_config:
   mealie_data:
+  # Cached Lavalink plugin jars for Scarlett (chown to uid 322 once, see scarlett.md)
+  scarlett_lavalink_plugins:

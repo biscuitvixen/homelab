@@ -1,0 +1,54 @@
+# Scarlett - a Discord bot (https://github.com/biscuitvixen/scarlett_ai)
+#
+# Only the CPU parts run here: the bot and its Lavalink audio server. The LLM
+# lives on the GPU host (the Spark) and is reached over the network, so point
+# SCARLETT_LLM_BASE_URL at that endpoint. See scarlett.md for first-run setup.
+#
+# NOTE: the bot image is published to GHCR by the scarlett_ai repo's CI. GHCR
+# packages are private by default, so either make it public or run
+# `docker login ghcr.io` on this host first, otherwise the pull fails.
+services:
+  scarlett-bot:
+    image: ghcr.io/biscuitvixen/scarlett_ai:latest
+    container_name: scarlett-bot
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      DISCORD_TOKEN: "${SCARLETT_DISCORD_TOKEN}"
+      # blank syncs slash commands globally; set a guild id for instant sync
+      GUILD_ID: "${SCARLETT_GUILD_ID:-}"
+      LLM_ENABLED: "${SCARLETT_LLM_ENABLED:-true}"
+      # the OpenAI-compatible endpoint on the Spark (llama-swap / vLLM)
+      LLM_BASE_URL: "${SCARLETT_LLM_BASE_URL}"
+      LLM_MODEL: "${SCARLETT_LLM_MODEL:-}"
+      LLM_API_KEY: "${SCARLETT_LLM_API_KEY:-not-needed}"
+      # she reaches lavalink over the shared homelab network by name
+      LAVALINK_URL: "http://scarlett-lavalink:2333"
+      LAVALINK_PASSWORD: "${SCARLETT_LAVALINK_PASSWORD:-youshallnotpass}"
+      CHAT_GUILD_IDS: "${SCARLETT_CHAT_GUILD_IDS:-}"
+      OWNER_IDS: "${SCARLETT_OWNER_IDS:-}"
+    volumes:
+      # sqlite db (user timezones etc) survives container recreates
+      - ${BASE}/appdata/scarlett/data:/app/data
+      # edit personality.md and the next reply uses it, no rebuild needed
+      - ../configs/scarlett/personality.md:/app/personality.md:ro
+
+  scarlett-lavalink:
+    image: ghcr.io/lavalink-devs/lavalink:4
+    container_name: scarlett-lavalink
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ}
+      LAVALINK_SERVER_PASSWORD: "${SCARLETT_LAVALINK_PASSWORD:-youshallnotpass}"
+      # blank on first run, then paste the token the logs print (see scarlett.md)
+      YOUTUBE_OAUTH_REFRESH_TOKEN: "${SCARLETT_YOUTUBE_OAUTH_REFRESH_TOKEN:-}"
+    volumes:
+      - ../configs/scarlett/application.yml:/opt/Lavalink/application.yml:ro
+      # cache downloaded plugin jars; needs chown to uid 322 once (see scarlett.md)
+      - scarlett_lavalink_plugins:/opt/Lavalink/plugins
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/2333' || exit 1"]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-30s}
