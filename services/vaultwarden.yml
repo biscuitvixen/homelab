@@ -13,7 +13,7 @@ services:
       # Set a long random string to enable the admin panel at /admin
       ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}"
     volumes:
-      - ${BASE}/appdata/vaultwarden:/data
+      - ${DATA:?DATA is not set}/vaultwarden:/data
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://127.0.0.1:80/alive || exit 1"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}

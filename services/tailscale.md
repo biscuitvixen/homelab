@@ -1,13 +1,13 @@
 # Tailscale VPN Setup
 
-This guide provides instructions for running Tailscale using the configuration in `services/tailscale.yml`. The single service definition uses the `${BASE}` environment variable to support both server deployments and Raspberry Pi exit node setups.
+This guide provides instructions for running Tailscale using the configuration in `services/tailscale.yml`. The single service definition works for both server deployments and Raspberry Pi exit node setups.
 
 ## Configuration Overview
 
 The Tailscale service uses environment variables to configure its behavior:
 - **`TS_HOSTNAME`**: Sets the device name in your Tailscale network
 - **`TS_ARGS`**: Controls Tailscale features like SSH access, exit node, and route advertising
-- **`BASE`**: Determines volume mount paths i.e. NFS mount for server and local stateful data for Pi
+- **`DATA`**: Local-disk root for stateful data; tailscale keeps its node state in `${DATA}/tailscale/state` and config in `${DATA}/tailscale/config`. Same value on server and Pi (default `/var/lib/homelab`). Node state is included in the nightly restic backup — losing it forces a re-auth.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ Create a `.env` file in the homelab root directory with your Tailscale configura
 TS_AUTHKEY=your_tailscale_auth_key_here
 TS_HOSTNAME=your-server-name
 TS_ARGS=--ssh  # Optional: enable SSH access over Tailscale
-BASE=/path/to/your/data  # Base path for data storage
+DATA=/var/lib/homelab  # Local root for stateful data
 ```
 
 **For Pi Profile (`pi`):**
@@ -41,7 +41,7 @@ BASE=/path/to/your/data  # Base path for data storage
 TS_AUTHKEY=your_tailscale_auth_key_here
 TS_HOSTNAME=raspberry-pi-exit-node
 TS_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24
-BASE=  # Empty string for direct host paths
+DATA=/var/lib/homelab  # Same local root as the server
 ```
 
 To get an auth key:
@@ -92,15 +92,17 @@ On your phone or other devices with the Tailscale app:
 
 ### Server Profile (`serv`)
 - **Standard Client**: Connects your server to the Tailscale network
-- **Configurable Storage**: Uses `${BASE}` path for flexible data storage
+- **Local Storage**: Node state under `${DATA}/tailscale` on the local disk, backed up nightly via restic
 - **Custom Arguments**: Supports additional Tailscale arguments via `${TS_ARGS}`
-- **Example**: `BASE=/mnt/storage` and `TS_ARGS=--ssh`
+- **Example**: `DATA=/var/lib/homelab` and `TS_ARGS=--ssh`
 
-### Pi Profile (`pi`) 
+### Pi Profile (`pi`)
 - **Exit Node**: Routes all internet traffic from your devices through the Raspberry Pi
 - **Subnet Routes**: Allows access to your local network (192.168.0.0/24) from remote devices
-- **Direct Storage**: Uses empty `BASE=` for direct host paths (`/var/lib/tailscale`, `/etc/tailscale`)
-- **Example**: `BASE=` and `TS_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24`
+- **Local Storage**: Same `${DATA}/tailscale` layout as the server
+- **Example**: `DATA=/var/lib/homelab` and `TS_ARGS=--advertise-exit-node --advertise-routes=192.168.0.0/24`
+- **Migrating an old Pi deployment**: the previous empty-`BASE` layout accidentally wrote state to `/appdata/tailscale`; move it once with
+  `sudo mkdir -p /var/lib/homelab/tailscale && sudo mv /appdata/tailscale /var/lib/homelab/tailscale/state && sudo mv /configs/tailscale /var/lib/homelab/tailscale/config 2>/dev/null || true`
 
 ## Troubleshooting
 

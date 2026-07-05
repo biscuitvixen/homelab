@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Navigate to the project directory
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
 
 # Pull the latest images for all services
-docker-compose pull
+docker compose pull
 
 # Restart all services to apply updates
-docker-compose up -d
+docker compose up -d
 
 # Optionally, remove unused images
 docker image prune -f

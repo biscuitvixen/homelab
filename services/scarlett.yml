@@ -29,7 +29,7 @@ services:
       OWNER_IDS: "${SCARLETT_OWNER_IDS:-}"
     volumes:
       # sqlite db (user timezones etc) survives container recreates
-      - ${BASE}/appdata/scarlett/data:/app/data
+      - ${DATA:?DATA is not set}/scarlett:/app/data
       # edit personality.md and the next reply uses it, no rebuild needed
       - ../configs/scarlett/personality.md:/app/personality.md:ro
 

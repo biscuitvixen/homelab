@@ -16,8 +16,8 @@ services:
       - TS_STATE_DIR=/var/lib/tailscale  # Use persistent state directory
     volumes:
       - /var/run/tailscale:/var/run/tailscale
-      - ${BASE}/appdata/tailscale:/var/lib/tailscale
-      - ${BASE}/configs/tailscale:/etc/tailscale
+      - ${DATA:?DATA is not set}/tailscale/state:/var/lib/tailscale
+      - ${DATA:?DATA is not set}/tailscale/config:/etc/tailscale
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "tailscale", "status", "--peers=false"]

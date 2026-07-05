@@ -15,7 +15,7 @@ services:
       ATUIN_DB_URI: "sqlite:///data/atuin.db"
       ATUIN_MAX_HISTORY_LENGTH: "${ATUIN_MAX_HISTORY_LENGTH:-8192}"
     volumes:
-      - ${BASE}/appdata/atuin:/data
+      - ${DATA:?DATA is not set}/atuin:/data
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8888' || exit 1"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}

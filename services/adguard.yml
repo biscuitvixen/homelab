@@ -9,8 +9,8 @@ services:
       # - "443:443"
       # - "3000:3000" # Initial setup
     volumes:
-      - ${BASE}/configs/adguard:/opt/adguardhome/conf
-      - ${BASE}/appdata/adguard:/opt/adguardhome/work
+      - ${DATA:?DATA is not set}/adguard/conf:/opt/adguardhome/conf
+      - ${DATA:?DATA is not set}/adguard/work:/opt/adguardhome/work
     restart: unless-stopped
     healthcheck:
       # test: ["CMD-SHELL", "nslookup -type=a archlinux.org 127.0.0.1 || exit 1"]

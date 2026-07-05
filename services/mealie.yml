@@ -20,7 +20,7 @@ services:
       DB_ENGINE: sqlite
       
     volumes:
-      - ${BASE}/appdata/mealie:/app/data
+      - ${DATA:?DATA is not set}/mealie:/app/data
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9000/api/app/about')"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
