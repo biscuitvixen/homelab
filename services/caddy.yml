@@ -7,8 +7,8 @@ services:
       - "443:443"   # publish HTTPS on the LXC host
     volumes:
       - ../configs/caddy/Caddyfile:/etc/caddy/Caddyfile:ro  # Config file
-      - ${BASE}/appdata/caddy/data:/data                    # Caddy's cert store (internal CA, certs, OCSP cache)
-      - caddy_config:/config                                # Admin API state (optional but nice to persist)
+      - ${DATA:?DATA is not set}/caddy/data:/data           # Caddy's cert store (internal CA, certs, OCSP cache)
+      - ${DATA:?DATA is not set}/caddy/config:/config       # Admin API state (optional but nice to persist)
       - ../web:/web:ro                                      # Local websites to serve
     restart: unless-stopped
     healthcheck:

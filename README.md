@@ -41,11 +41,24 @@ homelab/
 │       ├── services.json      # Service links configuration
 │       └── styles.css         # Modern responsive styling
 │
+├── backup/                     # Nightly restic backups (see backup/README.md)
+│   ├── lib.sh                 # Shared paths, container set, restic invocations
+│   ├── backup.sh              # Nightly job (systemd timer)
+│   └── backup-cli.sh          # Manual ops: snapshots, restore prep, dry runs
+│
 └── scripts/                    # Maintenance scripts
-    ├── backup.sh              # Backup data and configs
-    ├── restore.sh             # Restore from backup
+    ├── migrate-to-local.sh    # One-shot: move state off NFS onto $DATA
     └── update.sh              # Update all services
 ```
+
+## Storage Model
+
+All stateful service data lives on the **local disk** under `DATA=/var/lib/homelab`
+— never on the NFS mount. SQLite databases and NFS locking don't mix (the old
+`${BASE}`-on-NFS layout kept corrupting mealie). Instead, the important data is
+snapshotted nightly with restic to a local repo, then copied to the NAS —
+see [backup/README.md](backup/README.md). Migrating an existing deployment off
+the old NFS layout is automated by `scripts/migrate-to-local.sh`.
 
 ## Deployment Profiles
 
@@ -55,12 +68,12 @@ This homelab uses Docker Compose profiles to support different deployment scenar
 
 - **`serv`** - Full server deployment (Proxmox LXC)
   - Includes all core services
-  - Uses `${BASE}` path for flexible storage locations
+  - Stateful data under `${DATA}` on the local disk
   - Tailscale VPN with custom arguments
 
 - **`pi`** - Raspberry Pi deployment
   - Tailscale VPN (typically configured as exit node)
-  - Uses `${BASE}` path (set to empty for direct host paths)
+  - Same `${DATA}` path as the server (local disk)
   - Advertises local network routes via `TS_ARGS`
 
 - **`dns`** - DNS services only
@@ -85,7 +98,7 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - Automatic certificate management
 
 - **Tailscale** - Zero-config VPN
-  - Uses `${BASE}` variable for volume paths
+  - State under `${DATA}/tailscale` on the local disk
   - Configure via `TS_ARGS` environment variable for SSH access, exit nodes, and route advertising
   - See [services/tailscale.md](services/tailscale.md) for detailed setup
 
@@ -168,6 +181,7 @@ Track the working status of each service:
 git clone <your-repo-url> homelab
 cd homelab
 cp .env.example .env
+sudo mkdir -p /var/lib/homelab   # $DATA - local home for all stateful service data
 ```
 
 ### 2. Edit Environment Variables
@@ -178,7 +192,7 @@ nano .env
 
 Required variables:
 - `TZ` - Your timezone (e.g., `Europe/London`)
-- `BASE` - Base path for data storage (e.g., `/mnt/storage` for server, empty string for Pi)
+- `DATA` - Local path for stateful service data (default `/var/lib/homelab`; same on server and Pi, never an NFS mount)
 - `PUID`/`PGID` - User/group IDs for file permissions
 - `TS_AUTHKEY` - Tailscale authentication key
 - `TS_HOSTNAME` - Hostname for your Tailscale node
@@ -275,16 +289,13 @@ All services use internal TLS via Caddy:
 ## Maintenance
 
 ### Backups
+Nightly restic snapshots (04:00, before watchtower's 05:00 sweep) to a local
+repo, copied best-effort to the NAS. Setup, manual operations, and restore
+recipes are all in [backup/README.md](backup/README.md). Day to day:
 ```bash
-./scripts/backup.sh
+sudo backup/backup-cli.sh snapshots   # list snapshots
+sudo backup/backup-cli.sh backup      # ad-hoc snapshot (tagged manual, never auto-pruned)
 ```
-Backs up all data directories and configurations to the specified backup location.
-
-### Restore
-```bash
-./scripts/restore.sh
-```
-Restores from the latest backup.
 
 ### Updates
 ```bash

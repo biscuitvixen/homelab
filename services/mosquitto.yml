@@ -11,7 +11,7 @@ services:
       - "9001:9001"
     volumes:
       - ../configs/mosquitto:/mosquitto/config:ro
-      - ${BASE}/appdata/mosquitto/data:/mosquitto/data
+      - ${DATA:?DATA is not set}/mosquitto:/mosquitto/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/broker/version' -C 1 -W 15 >/dev/null 2>&1 || exit 1"]

@@ -6,7 +6,7 @@ services:
     volumes:
       # Bind mount docker to allow it to access the Docker daemon socket
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${BASE}/appdata/tailscale/portainer:/data
+      - ${DATA:?DATA is not set}/portainer:/data
     environment:
       - TZ=${TZ}
     healthcheck:

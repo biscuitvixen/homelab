@@ -3,7 +3,7 @@ services:
     image: homeassistant/home-assistant:latest
     container_name: homeassistant
     volumes:
-      - ${BASE}/configs/homeassistant:/config
+      - ${DATA:?DATA is not set}/homeassistant:/config
     environment:
       - TZ=${TZ}
     restart: unless-stopped

@@ -6,7 +6,7 @@ services:
     security_opt:
       - apparmor:unconfined
     volumes:
-      - ${BASE}/appdata/matter-server:/data
+      - ${DATA:?DATA is not set}/matter-server:/data
       - /run/dbus:/run/dbus:ro
     network_mode: host
     environment:

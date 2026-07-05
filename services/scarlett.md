@@ -28,6 +28,7 @@ docker compose --profile ai up -d
 
 ## Notes
 
+- The bot's SQLite DB lives at `${DATA}/scarlett` on the local disk and is included in the nightly restic backup (see [backup/README.md](../backup/README.md)).
 - `watchtower` (already in this stack) will auto-pull new bot images as the app's CI publishes them.
 - Personality lives in `configs/scarlett/personality.md`; edit it and the next reply uses it, no restart needed.
 - Lavalink config is `configs/scarlett/application.yml`; the OAuth token is injected from `.env`, not stored there.
