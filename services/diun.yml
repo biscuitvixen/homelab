@@ -33,14 +33,18 @@ services:
       # upstream mealie image we rebuild locally.
       DIUN_PROVIDERS_FILE_FILENAME: "/watch.yml"
 
-      # Watch the whole repo for new tags, not just the running one, and
-      # report only the newest real semver release. Without INCLUDETAGS
-      # every nightly and rc tag counts as an update. The $$ is a literal
-      # $ escaped for compose interpolation.
-      DIUN_DEFAULTS_WATCHREPO: "true"
-      DIUN_DEFAULTS_SORTTAGS: "semver"
-      DIUN_DEFAULTS_MAXTAGS: "1"
-      DIUN_DEFAULTS_INCLUDETAGS: '^v?\d+\.\d+\.\d+$$'
+      # Watch the exact tag each container runs, and report when THAT tag's
+      # digest changes. Repo scanning (watchRepo) is deliberately off here:
+      # it reports the newest semver tag in a repository, which for a stack
+      # running :latest is the wrong question. It would say "caddy 2.11.4
+      # exists" while never noticing that the :latest you run has moved,
+      # and the digests of :latest and 2.11.4 differ even when the content
+      # is identical, so comparing across them yields false positives.
+      #
+      # Repo scanning is enabled per-entry in configs/diun/watch.yml for
+      # the one case where a version number is what matters: mealie, which
+      # is pinned and rebuilt by hand.
+      DIUN_DEFAULTS_WATCHREPO: "false"
 
       DIUN_WATCH_SCHEDULE: "${DIUN_SCHEDULE:-0 */6 * * *}"
       # Without this the very first run announces every image at once.

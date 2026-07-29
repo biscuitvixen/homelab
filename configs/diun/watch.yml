@@ -1,9 +1,9 @@
 # Images Diun should watch that have no running container of their own.
 # The Docker provider covers everything else automatically.
 #
-# Global DIUN_DEFAULTS_* still apply here (semver sort, maxTags=1, and the
-# three-part-semver includeTags filter), so entries only need to say what
-# is different.
+# Repo scanning is off globally (see services/diun.yml), so any entry that
+# wants "what is the newest released version" has to ask for it here, along
+# with the tag filtering that makes the answer useful.
 
 # Mealie runs as a locally built image (mealie-local:...), which exists in
 # no registry and so cannot be watched through the Docker provider. Its
@@ -13,6 +13,11 @@
 # not pulling.
 - name: ghcr.io/mealie-recipes/mealie
   watch_repo: true
+  sort_tags: semver
+  max_tags: 1
+  # Three-part semver only, or every rc and nightly tag becomes a release.
+  include_tags:
+    - ^v?\d+\.\d+\.\d+$
 
 # Scarlett's CI publishes only a moving :latest tag, so the global
 # three-part-semver includeTags filter matches nothing and the Docker
@@ -21,7 +26,3 @@
 # signal for a continuously published image.
 - name: ghcr.io/biscuitvixen/scarlett_ai:latest
   watch_repo: false
-  # The global includeTags filter applies to file entries too, so :latest
-  # is skipped unless this entry overrides it.
-  include_tags:
-    - ^latest$

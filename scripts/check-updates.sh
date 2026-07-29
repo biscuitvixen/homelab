@@ -10,8 +10,14 @@
 #
 # Comparison is by DIGEST, not tag. Most services here run :latest, so
 # comparing tag strings would report "latest vs latest" forever and miss
-# every update. The running image's RepoDigest is what actually pins what
+# every update. The running image's RepoDigests are what actually pin what
 # you have.
+#
+# Note RepoDigests is a LIST, not a single value. An image pulled more than
+# once accumulates an entry per manifest it has been resolved under, and
+# the current one is not necessarily first. Taking element 0 reports
+# up-to-date images as needing updates, so this tests membership of the
+# whole list.
 #
 # Usage:
 #   ./scripts/check-updates.sh          print a table
@@ -67,8 +73,9 @@ while IFS= read -r name; do
   img_id="$(docker inspect -f '{{.Image}}' "$name" 2>/dev/null || echo "")"
   digest=""
   if [ -n "$img_id" ]; then
-    repo_digest="$(docker image inspect -f '{{if .RepoDigests}}{{index .RepoDigests 0}}{{end}}' "$img_id" 2>/dev/null || echo "")"
-    digest="${repo_digest##*@}"
+    # Every digest this image is known by, comma separated, repo stripped.
+    digest="$(docker image inspect -f '{{range .RepoDigests}}{{.}},{{end}}' "$img_id" 2>/dev/null \
+              | tr ',' '\n' | sed -n 's/.*@//p' | paste -sd, -)"
   fi
   rows+="${name}"$'\t'"${ref}"$'\t'"${digest}"$'\t'"${label}"$'\t'"${watch_as}"$'\n'
 done < <(docker ps --format '{{.Names}}' | sort)
@@ -100,7 +107,7 @@ report="$(
        | map({
            container: .[0],
            ref:       .[1],
-           digest:    .[2],
+           digests:   ((.[2] // "") | split(",") | map(select(length > 0))),
            optout:    (.[3] == "false"),
            watch_as:  (.[4] // "")
          })) as $running
@@ -118,9 +125,10 @@ report="$(
             available: ($latest.tag // null),
             status: (
               if $c.optout then "pinned"
-              elif ($c.digest == "") then "local"
+              elif (($c.digests | length) == 0) then "local"
               elif ($latest == null) then "unwatched"
-              elif ($latest.digest == $c.digest) then "current"
+              # Membership, not equality: see the RepoDigests note above.
+              elif ($c.digests | index($latest.digest)) then "current"
               else "UPDATE"
               end
             )
