@@ -14,12 +14,16 @@ services:
     container_name: docker-socket-proxy
     restart: unless-stopped
     environment:
-      # Read-only container enumeration. This is all Diun asks for.
+      # Diun needs both: CONTAINERS to enumerate what is running, and
+      # IMAGES to inspect each container's image for its RepoDigest.
+      # CONTAINERS alone yields a 403 on every container ("Cannot inspect
+      # image" in the Diun log). Both are GET-only; POST stays denied, so
+      # nothing here can create, start or delete anything.
       CONTAINERS: "1"
+      IMAGES: "1"
       # Explicitly denied. Listed rather than omitted so the intent is
       # visible in the file and nobody has to remember the defaults.
       POST: "0"
-      IMAGES: "0"
       NETWORKS: "0"
       VOLUMES: "0"
       EXEC: "0"
