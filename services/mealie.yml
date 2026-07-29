@@ -4,7 +4,7 @@ services:
     # pre-SSE4.2 CPU. See services/mealie/Dockerfile for the full story.
     build:
       context: ./mealie
-    image: mealie-local:v3.19.2-numpy1
+    image: mealie-local:v3.22.0-numpy1
     container_name: mealie
     restart: unless-stopped
     labels:

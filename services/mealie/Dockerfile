@@ -17,7 +17,7 @@
 # broke this service on 2026-04-14 and left it down until it was noticed.
 # Bump this tag by hand, rebuild, and check the container reaches
 # "Application startup complete." before considering it done.
-FROM ghcr.io/mealie-recipes/mealie:v3.19.2
+FROM ghcr.io/mealie-recipes/mealie:v3.22.0
 
 USER root
 RUN pip install --no-cache-dir "numpy<2"
