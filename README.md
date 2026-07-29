@@ -24,7 +24,9 @@ homelab/
 │   ├── vaultwarden.yml        # Bitwarden-compatible password manager
 │   ├── tailscale.md           # Detailed Tailscale setup guide
 │   ├── unbound.yml            # Recursive DNS resolver
-│   └── watchtower.yml         # Automatic container updates
+│   ├── diun.yml               # Image update notifier (no auto-updates)
+│   ├── diun.md                # Diun setup & how to act on a notification
+│   └── docker-socket-proxy.yml # Read-only Docker API for Diun
 │
 ├── configs/                    # Service configuration files
 │   ├── caddy/
@@ -136,10 +138,12 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - Disable signups after account creation
 
 ### Management & Monitoring
-- **Watchtower** - Automatic container updates
-  - Runs daily at 5 AM
-  - Cleans up old images
-  - Monitors all containers (including stopped ones)
+- **Diun** - Image update notifier
+  - Checks every 6 hours, notifies on Discord
+  - **Never updates anything**; you apply updates with `./scripts/update.sh`
+  - Replaced Watchtower after an unattended update broke mealie for three
+    months (see [services/diun.md](services/diun.md))
+  - Reads Docker through a read-only socket proxy
 
 - **Portainer** - Web-based Docker management
   - Container deployment and monitoring
@@ -171,7 +175,7 @@ Track the working status of each service:
 
 ### Infrastructure
 - ~~**Portainer** - Container management~~
-- [x] **Watchtower** - Auto-updates
+- [x] **Diun** - Update notifications (no auto-updates)
 
 ## Quick Start
 
@@ -284,24 +288,39 @@ All services use internal TLS via Caddy:
 | Vaultwarden | 8080 | 80 | TCP | Password manager & web vault |
 | Home Assistant | 8123 | — | TCP | Host networking |
 | Tailscale | — | — | — | Host networking |
-| Watchtower | — | — | — | No published ports |
+| Diun | — | — | — | No published ports |
+| Socket proxy | — | 2375 | TCP | Internal to homelab_network only |
 
 ## Maintenance
 
 ### Backups
-Nightly restic snapshots (04:00, before watchtower's 05:00 sweep) to a local
-repo, copied best-effort to the NAS. Setup, manual operations, and restore
-recipes are all in [backup/README.md](backup/README.md). Day to day:
+Nightly restic snapshots at 04:00 to a local repo, copied best-effort to the
+NAS. Setup, manual operations, and restore recipes are all in
+[backup/README.md](backup/README.md). Day to day:
 ```bash
 sudo backup/backup-cli.sh snapshots   # list snapshots
 sudo backup/backup-cli.sh backup      # ad-hoc snapshot (tagged manual, never auto-pruned)
 ```
 
 ### Updates
+Nothing updates itself. Diun notifies you on Discord when a new image is
+published; you decide when to act.
+
+See what's actually outstanding:
+```bash
+./scripts/check-updates.sh
+```
+Compares what's running against what Diun has found. The same list appears
+on the lab.lan dashboard, refreshed daily at 06:00 by `homelab-updates.timer`.
+
+Apply them:
 ```bash
 ./scripts/update.sh
 ```
 Pulls latest images and restarts services.
+
+Mealie is the exception: it's built locally for this host's CPU, so it needs
+its pinned tag bumped and a rebuild. See [services/diun.md](services/diun.md).
 
 ### Reload Caddy
 After editing the Caddyfile, reload without downtime:

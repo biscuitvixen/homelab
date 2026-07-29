@@ -20,9 +20,11 @@ scripts and the systemd unit.
 
 ## Schedule
 
-04:00 daily (host local time). Deliberately **before watchtower's 05:00
-image-update sweep**: watchtower must never recreate a container the backup
-job has paused, or the unpause safety net breaks.
+04:00 daily (host local time). This originally had to beat watchtower's
+05:00 image-update sweep, since an auto-update recreating a paused
+container would break the unpause safety net. Watchtower has been replaced
+by Diun, which only notifies, so nothing recreates containers behind this
+job. The time is kept because 04:00 is quiet, not because it has to be.
 
 ## What is backed up
 
@@ -134,7 +136,7 @@ User=root
 Create `/etc/systemd/system/backup-homelab.timer`:
 ```ini
 [Unit]
-Description=Daily homelab backup at 04:00 (before watchtower's 05:00 sweep)
+Description=Daily homelab backup at 04:00
 
 [Timer]
 OnCalendar=*-*-* 04:00:00

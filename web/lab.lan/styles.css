@@ -171,6 +171,61 @@ p.desc {
   margin: 0 0 1rem;
 }
 
+/* Update panel (fed by scripts/check-updates.sh --json) */
+.update-badge {
+  display: inline-block;
+  margin-left: .5rem;
+  padding: .1rem .55rem;
+  border-radius: 999px;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+}
+
+.update-badge--clear {
+  color: var(--muted);
+  background: var(--ring);
+}
+
+.update-panel {
+  background: var(--card);
+  border: 1px solid var(--ring);
+  border-radius: 18px;
+  padding: 1rem 1.1rem;
+}
+
+.update-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: .45rem 0;
+  border-bottom: 1px solid var(--ring);
+}
+
+.update-row:last-child {
+  border-bottom: 0;
+}
+
+.update-name {
+  font-weight: 600;
+}
+
+.update-versions {
+  font-size: .9rem;
+}
+
+.update-clear {
+  margin: 0;
+}
+
+.update-meta {
+  margin: .8rem 0 0;
+  font-size: .8rem;
+}
+
 .table-wrapper {
   overflow-x: auto;
   border-radius: 16px;

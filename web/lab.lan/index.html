@@ -95,6 +95,29 @@ security.pki.certificateFiles = [
         </a>
       </section>
 
+      <!-- Populated from updates.json, written by scripts/check-updates.sh.
+           Hidden entirely until that file exists. -->
+      <section v-if="updates" class="table-section">
+        <h2 class="table-heading">
+          Updates
+          <span class="update-badge" :class="{ 'update-badge--clear': updates.count === 0 }">
+            {{ updates.count }}
+          </span>
+        </h2>
+        <div class="update-panel">
+          <div v-if="pendingUpdates.length" class="update-list">
+            <div v-for="svc in pendingUpdates" :key="svc.name" class="update-row">
+              <span class="update-name">{{ svc.name }}</span>
+              <span class="mono update-versions">
+                {{ svc.running }} <span class="muted">-&gt;</span> {{ svc.available || "new" }}
+              </span>
+            </div>
+          </div>
+          <p v-else class="muted update-clear">Everything is up to date.</p>
+          <p class="update-meta muted">checked {{ checkedAt }}</p>
+        </div>
+      </section>
+
       <section class="table-section">
         <h2 class="table-heading">All Services</h2>
         <div class="table-wrapper">

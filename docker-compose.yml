@@ -75,11 +75,24 @@ services:
     networks:
       - homelab_network
 
-  watchtower:
+  docker-socket-proxy:
     extends:
-      file: ./services/watchtower.yml
-      service: watchtower
+      file: ./services/docker-socket-proxy.yml
+      service: docker-socket-proxy
     profiles: ["serv", "pi"]
+    networks:
+      - homelab_network
+
+  diun:
+    extends:
+      file: ./services/diun.yml
+      service: diun
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
+    profiles: ["serv", "pi"]
+    networks:
+      - homelab_network
 
   scarlett-lavalink:
     extends:

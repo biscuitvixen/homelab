@@ -1,0 +1,15 @@
+# Images Diun should watch that have no running container of their own.
+# The Docker provider covers everything else automatically.
+#
+# Global DIUN_DEFAULTS_* still apply here (semver sort, maxTags=1, and the
+# three-part-semver includeTags filter), so entries only need to say what
+# is different.
+
+# Mealie runs as a locally built image (mealie-local:...), which exists in
+# no registry and so cannot be watched through the Docker provider. Its
+# container carries diun.enable=false; this entry watches the upstream
+# image instead, so a new release still reaches you. Acting on it means
+# bumping the pinned FROM tag in services/mealie/Dockerfile and rebuilding,
+# not pulling.
+- name: ghcr.io/mealie-recipes/mealie
+  watch_repo: true

@@ -9,9 +9,11 @@
 #   1. restic → local repo on the host disk (always runs, fast)
 #   2. restic copy → NFS mount on the NAS (best-effort, skipped if not mounted)
 #
-# Scheduled at 04:00 daily via systemd timer - deliberately before
-# watchtower's 05:00 image-update sweep, which must never recreate a
-# container we have paused.
+# Scheduled at 04:00 daily via systemd timer. This used to have to land
+# before watchtower's 05:00 sweep, because an auto-update recreating a
+# paused container would break the unpause safety net. Diun replaced
+# watchtower and only ever notifies, so nothing recreates containers
+# behind this job any more.
 #
 # Shared paths, container set, and restic invocations live in backup/lib.sh
 # so this file and backup-cli.sh stay in lockstep.

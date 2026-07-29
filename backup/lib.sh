@@ -63,7 +63,8 @@ hl_load_env() {
 #   caddy, adguard, unbound - pausing adguard kills DNS for the whole LAN;
 #     adguard/conf only changes on settings edits, safe to snapshot live
 #   tailscale - would drop remote access mid-backup; state writes are rare
-#   watchtower, scarlett-lavalink - no state worth quiescing
+#   diun, docker-socket-proxy, scarlett-lavalink - no state worth quiescing
+#     (diun's DB is a rebuildable cache of registry state)
 #
 # pause/unpause (SIGSTOP/SIGCONT) is used instead of stop/start so Docker
 # doesn't treat the exit as a crash and auto-restart containers mid-backup.

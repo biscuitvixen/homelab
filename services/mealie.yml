@@ -8,9 +8,15 @@ services:
     container_name: mealie
     restart: unless-stopped
     labels:
-      # Watchtower runs unfiltered here, and an unattended :latest update is
-      # exactly what broke mealie in April. This image is built by hand.
-      com.centurylinklabs.watchtower.enable: "false"
+      # This image is built locally and exists in no registry, so Diun's
+      # Docker provider has nothing to check and would only log errors.
+      # The upstream image is watched via configs/diun/watch.yml instead;
+      # acting on that notification means bumping the pinned FROM tag and
+      # rebuilding, not pulling.
+      diun.enable: "false"
+      # Read by scripts/check-updates.sh: the upstream this local image is
+      # built from, so the update list can still show what's available.
+      homelab.watch-image: "ghcr.io/mealie-recipes/mealie"
     # Remove port publishing - only accessible via Caddy
     # Re-added for now
     ports:

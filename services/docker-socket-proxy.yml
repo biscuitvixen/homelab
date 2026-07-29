@@ -1,0 +1,50 @@
+# A read-only filter in front of the Docker socket, so Diun can enumerate
+# running containers without being able to control the daemon. Anything
+# with the raw socket bind-mounted can create, start and delete
+# containers; that was acceptable for watchtower because controlling
+# containers was its whole job, and is not acceptable for a service whose
+# only job is to look.
+#
+# Every permission defaults to denied. CONTAINERS=1 is the single grant
+# Diun needs (list plus inspect). If Diun ever logs a 403, read the log
+# and add one variable at a time rather than opening POST.
+services:
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: docker-socket-proxy
+    restart: unless-stopped
+    environment:
+      # Read-only container enumeration. This is all Diun asks for.
+      CONTAINERS: "1"
+      # Explicitly denied. Listed rather than omitted so the intent is
+      # visible in the file and nobody has to remember the defaults.
+      POST: "0"
+      IMAGES: "0"
+      NETWORKS: "0"
+      VOLUMES: "0"
+      EXEC: "0"
+      SERVICES: "0"
+      TASKS: "0"
+      SECRETS: "0"
+      CONFIGS: "0"
+      SWARM: "0"
+      NODES: "0"
+      INFO: "0"
+      AUTH: "0"
+      BUILD: "0"
+      COMMIT: "0"
+      DISTRIBUTION: "0"
+      PLUGINS: "0"
+      SESSION: "0"
+      SYSTEM: "0"
+      VERSION: "1"
+    volumes:
+      # Bind mount docker to allow it to access the Docker daemon socket.
+      # Read-only: the proxy never needs to write to the socket itself.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 2375 || exit 1"]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-10s}

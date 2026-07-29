@@ -25,5 +25,3 @@ services:
       timeout: ${HEALTHCHECK_TIMEOUT:-10s}
       retries: ${HEALTHCHECK_RETRIES:-3}
       start_period: ${HEALTHCHECK_START_PERIOD:-60s}
-    labels:
-      - "com.centurylinklabs.watchtower.enable=false"

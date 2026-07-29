@@ -54,7 +54,7 @@ left untouched. Expected warnings:
 ## 3. Install the systemd timer
 
 Unit texts are in [backup/README.md](../backup/README.md) step 5 (service +
-timer, 04:00 daily — before watchtower's 05:00 sweep). Then:
+timer, 04:00 daily). Then:
 
 ```bash
 sudo systemctl daemon-reload
