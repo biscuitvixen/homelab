@@ -14,6 +14,12 @@ services:
     container_name: diun
     restart: unless-stopped
     command: serve
+    # Without this the container hostname is its own container ID, and
+    # {{ .Meta.Hostname }} in the notification template renders as a
+    # meaningless hex string. Naming it after the host is what makes a
+    # Discord message identifiable when more than one machine reports
+    # into the same account.
+    hostname: ${SERVER_NAME:-homelab}
     environment:
       TZ: ${TZ}
       LOG_LEVEL: "info"
@@ -43,6 +49,11 @@ services:
       DIUN_NOTIF_DISCORD_WEBHOOKURL: ${DIUN_NOTIF_DISCORD_WEBHOOKURL}
       DIUN_NOTIF_DISCORD_RENDERFIELDS: "false"
       DIUN_NOTIF_DISCORD_RENDEREMBEDS: "false"
+      # Leads with the host name so a message is identifiable at a glance
+      # when several machines notify the same Discord. Otherwise identical
+      # to the template used on the VPS: image name, tag, and whether the
+      # tag is newly available or an existing one was updated in place.
+      DIUN_NOTIF_DISCORD_TEMPLATEBODY: '**[{{ .Meta.Hostname }}]** {{ if .Entry.Image.HubLink }}[**{{ regexReplaceAll ".*/" "" .Entry.Image.Path }}** {{ .Entry.Image.Tag }}]({{ .Entry.Image.HubLink }}){{ else }}**{{ regexReplaceAll ".*/" "" .Entry.Image.Path }}** {{ .Entry.Image.Tag }}{{ end }} {{ if eq (printf "%v" .Entry.Status) "new" }}available{{ else }}updated{{ end }}'
 
       DIUN_DB_PATH: "/data/diun.db"
     volumes:
