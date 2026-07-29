@@ -24,7 +24,12 @@ docker compose --profile ai up -d
    docker run --rm -v homelab_scarlett_lavalink_plugins:/p alpine chown -R 322:322 /p
    ```
    (Confirm the exact volume name with `docker volume ls | grep scarlett`.)
-4. **YouTube OAuth.** Start with `SCARLETT_YOUTUBE_OAUTH_REFRESH_TOKEN` blank, watch `docker compose logs -f scarlett-lavalink` for a device-link URL and code, authorise with a **burner** Google account (never your main one), then paste the refresh token it logs into `.env` and restart.
+4. **Pre-create the bot's data dir.** The bot runs as uid 1000, but Docker creates the `${DATA}/scarlett` bind mount as root on first `up`, so its SQLite DB fails with `unable to open database file` until:
+   ```sh
+   sudo mkdir -p /var/lib/homelab/scarlett && sudo chown 1000:1000 /var/lib/homelab/scarlett
+   ```
+   Then `docker compose up -d scarlett-bot`.
+5. **YouTube OAuth.** Start with `SCARLETT_YOUTUBE_OAUTH_REFRESH_TOKEN` blank, watch `docker compose logs -f scarlett-lavalink` for a device-link URL and code, authorise with a **burner** Google account (never your main one), then paste the refresh token it logs into `.env` and restart.
 
 ## Notes
 
