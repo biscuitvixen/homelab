@@ -1,10 +1,4 @@
 services:
-  # samba:
-  #   extends:
-  #     file: ./services/samba.yml
-  #     service: samba
-  #   profiles: ["serv"]
-  #   user: "1001:3001"
 
   tailscale:
     extends:
