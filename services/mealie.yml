@@ -1,8 +1,16 @@
 services:
   mealie:
-    image: ghcr.io/mealie-recipes/mealie:latest
+    # Built locally rather than pulled: NumPy 2.x SIGILLs on this host's
+    # pre-SSE4.2 CPU. See services/mealie/Dockerfile for the full story.
+    build:
+      context: ./mealie
+    image: mealie-local:v3.19.2-numpy1
     container_name: mealie
     restart: unless-stopped
+    labels:
+      # Watchtower runs unfiltered here, and an unattended :latest update is
+      # exactly what broke mealie in April. This image is built by hand.
+      com.centurylinklabs.watchtower.enable: "false"
     # Remove port publishing - only accessible via Caddy
     # Re-added for now
     ports:
