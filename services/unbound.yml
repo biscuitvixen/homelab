@@ -11,6 +11,9 @@ services:
     volumes:
       - ../configs/unbound/unbound.conf:/opt/unbound/etc/unbound/unbound.conf:ro
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Caches are capped at 96 MB in unbound.conf; this backstops that.
+    mem_limit: 192m
     healthcheck:
       test: ["CMD", "drill", "@127.0.0.1", "cloudflare.com", "A"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}

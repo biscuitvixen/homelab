@@ -13,6 +13,9 @@ services:
     image: tecnativa/docker-socket-proxy:latest
     container_name: docker-socket-proxy
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~20 MB.
+    mem_limit: 64m
     environment:
       # Diun needs both: CONTAINERS to enumerate what is running, and
       # IMAGES to inspect each container's image for its RepoDigest.

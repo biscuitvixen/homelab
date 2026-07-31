@@ -12,6 +12,9 @@ services:
     image: ghcr.io/biscuitvixen/scarlett_ai:latest
     container_name: scarlett-bot
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~93 MB.
+    mem_limit: 192m
     environment:
       TZ: ${TZ}
       DISCORD_TOKEN: "${SCARLETT_DISCORD_TOKEN}"
@@ -37,6 +40,9 @@ services:
     image: ghcr.io/lavalink-devs/lavalink:4
     container_name: scarlett-lavalink
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. JVM, measured ~295 MB.
+    mem_limit: 448m
     environment:
       TZ: ${TZ}
       LAVALINK_SERVER_PASSWORD: "${SCARLETT_LAVALINK_PASSWORD:-youshallnotpass}"

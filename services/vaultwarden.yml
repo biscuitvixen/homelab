@@ -3,6 +3,9 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~34 MB.
+    mem_limit: 128m
     ports:
       - "${VAULTWARDEN_PORT:-8080}:80"
     environment:

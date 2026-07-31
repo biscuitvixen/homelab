@@ -19,6 +19,9 @@ services:
       - ${DATA:?DATA is not set}/tailscale/state:/var/lib/tailscale
       - ${DATA:?DATA is not set}/tailscale/config:/etc/tailscale
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~80 MB.
+    mem_limit: 128m
     healthcheck:
       test: ["CMD", "tailscale", "status", "--peers=false"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}

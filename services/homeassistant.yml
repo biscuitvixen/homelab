@@ -7,6 +7,9 @@ services:
     environment:
       - TZ=${TZ}
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~421 MB, the largest consumer here.
+    mem_limit: 640m
     network_mode: host
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8123"]

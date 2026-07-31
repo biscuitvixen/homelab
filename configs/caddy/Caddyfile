@@ -9,20 +9,39 @@
 	tls internal
 }
 
+# === access logging ===
+# Caddy logs proxy-layer failures (502, 504) on its own, but a 500 returned by
+# an upstream application passes straight through and is recorded nowhere. That
+# gap made a reported run of "500 Internal Server Error" pages impossible to
+# investigate: 48 hours of logs contained exactly one entry, and it was a 502.
+#
+# Every site imports this. Output goes to stdout so it lands in `docker logs
+# caddy` with nothing to rotate inside the container; the daemon-level rotation
+# in /etc/docker/daemon.json bounds it on disk.
+(access_log) {
+	log {
+		output stdout
+		format json
+	}
+}
+
 # === Reverse proxies ===
 
 adguard.lan {
 	import tls_internal
+	import access_log
 	reverse_proxy adguard:80
 }
 
 home.lan {
   import tls_internal
+  import access_log
 	reverse_proxy http://192.168.0.12:8123
 }
 
 truenas.lan {
   import tls_internal
+  import access_log
 	reverse_proxy https://192.168.0.11 {
     transport http {
       tls_insecure_skip_verify
@@ -32,6 +51,7 @@ truenas.lan {
 
 pve.lan {
   import tls_internal
+  import access_log
   reverse_proxy https://192.168.0.10:8006 {
     transport http {
       tls_insecure_skip_verify
@@ -41,22 +61,26 @@ pve.lan {
 
 mealie.lan {
   import tls_internal
+  import access_log
   reverse_proxy mealie:9000
 }
 
 vault.lan {
   import tls_internal
+  import access_log
   reverse_proxy vaultwarden:80
 }
 
 atuin.lan {
   import tls_internal
+  import access_log
   reverse_proxy atuin:8888
 }
 
 # A landing page at https://lab.lan/
 lab.lan {
 	import tls_internal
+	import access_log
 	
 	root * /web/lab.lan
 	file_server

@@ -12,6 +12,9 @@ services:
       - ${DATA:?DATA is not set}/adguard/conf:/opt/adguardhome/conf
       - ${DATA:?DATA is not set}/adguard/work:/opt/adguardhome/work
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~128 MB.
+    mem_limit: 256m
     healthcheck:
       # test: ["CMD-SHELL", "nslookup -type=a archlinux.org 127.0.0.1 || exit 1"]
       test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1/ || exit 1"]

@@ -13,6 +13,9 @@ services:
     image: crazymax/diun:latest
     container_name: diun
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~17 MB.
+    mem_limit: 64m
     command: serve
     # Without this the container hostname is its own container ID, and
     # {{ .Meta.Hostname }} in the notification template renders as a

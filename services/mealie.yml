@@ -7,6 +7,9 @@ services:
     image: mealie-local:v3.22.0-numpy1
     container_name: mealie
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~324 MB.
+    mem_limit: 512m
     labels:
       # This image is built locally and exists in no registry, so Diun's
       # Docker provider has nothing to check and would only log errors.

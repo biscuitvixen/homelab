@@ -3,6 +3,9 @@ services:
     image: ghcr.io/atuinsh/atuin:latest
     container_name: atuin
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~3 MB, but it is a database and can grow.
+    mem_limit: 128m
     command: start
     ports:
       - "${ATUIN_PORT:-8888}:8888"

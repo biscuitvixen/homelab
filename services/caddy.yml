@@ -11,6 +11,9 @@ services:
       - ${DATA:?DATA is not set}/caddy/config:/config       # Admin API state (optional but nice to persist)
       - ../web:/web:ro                                      # Local websites to serve
     restart: unless-stopped
+    # Ceiling so one service cannot starve the other twelve on a 2 GB
+    # host. Measured ~34 MB.
+    mem_limit: 128m
     healthcheck:
       test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
