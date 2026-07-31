@@ -30,6 +30,9 @@ services:
       LAVALINK_PASSWORD: "${SCARLETT_LAVALINK_PASSWORD:-youshallnotpass}"
       CHAT_GUILD_IDS: "${SCARLETT_CHAT_GUILD_IDS:-}"
       OWNER_IDS: "${SCARLETT_OWNER_IDS:-}"
+      # DEBUG adds the step by step of her time parsing, which is where a
+      # quiet failure hides. Applies to her own loggers, not discord.py's
+      LOG_LEVEL: "${SCARLETT_LOG_LEVEL:-INFO}"
     volumes:
       # sqlite db (user timezones etc) survives container recreates
       - ${DATA:?DATA is not set}/scarlett:/app/data
