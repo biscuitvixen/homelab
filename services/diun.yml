@@ -14,8 +14,10 @@ services:
     container_name: diun
     restart: unless-stopped
     # Ceiling so one service cannot starve the other twelve on a 2 GB
-    # host. Measured ~17 MB.
-    mem_limit: 64m
+    # host. Idles around 17 MB but climbs past 50 MB while a scan is
+    # running, so 64m left it at 79% of its own limit. 128m gives the
+    # scan real headroom.
+    mem_limit: 128m
     command: serve
     # Without this the container hostname is its own container ID, and
     # {{ .Meta.Hostname }} in the notification template renders as a
