@@ -25,6 +25,10 @@ services:
       LLM_BASE_URL: "${SCARLETT_LLM_BASE_URL}"
       LLM_MODEL: "${SCARLETT_LLM_MODEL:-}"
       LLM_API_KEY: "${SCARLETT_LLM_API_KEY:-not-needed}"
+      # false drops the music cog and stops her contacting lavalink at all.
+      # Turning it off only frees the memory if scarlett-lavalink stops too,
+      # which needs the compose profile and depends_on changing as well
+      MUSIC_ENABLED: "${SCARLETT_MUSIC_ENABLED:-true}"
       # she reaches lavalink over the shared homelab network by name
       LAVALINK_URL: "http://scarlett-lavalink:2333"
       LAVALINK_PASSWORD: "${SCARLETT_LAVALINK_PASSWORD:-youshallnotpass}"

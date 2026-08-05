@@ -37,3 +37,4 @@ docker compose --profile ai up -d
 - `diun` (already in this stack) notifies you on Discord when the app's CI publishes a new bot image. Nothing updates on its own; apply it with `./scripts/update.sh` when you're ready.
 - Personality lives in `configs/scarlett/personality.md`; edit it and the next reply uses it, no restart needed.
 - Lavalink config is `configs/scarlett/application.yml`; the OAuth token is injected from `.env`, not stored there.
+- `SCARLETT_MUSIC_ENABLED=false` drops the music cog and stops the bot contacting Lavalink, but it does **not** stop `scarlett-lavalink` itself: the two share the `ai` compose profile, and the bot's `depends_on` still waits for it to report healthy. Reclaiming its ~295 MB means giving Lavalink a profile of its own and dropping that `depends_on` as well. Worth doing only if nobody uses `/play`.
