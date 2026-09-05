@@ -55,8 +55,7 @@ homelab/
 
 ## Storage Model
 
-All stateful service data lives on the **local disk** under `DATA=/var/lib/homelab`
-- never on the NFS mount. SQLite databases and NFS locking don't mix (the old
+All stateful service data lives on the **local disk** under `DATA=/var/lib/homelab`, never on the NFS mount. SQLite databases and NFS locking don't mix (the old
 `${BASE}`-on-NFS layout kept corrupting mealie). Instead, the important data is
 snapshotted nightly with restic to a local repo, then copied to the NAS -
 see [backup/README.md](backup/README.md). Migrating an existing deployment off
