@@ -26,7 +26,9 @@ homelab/
 │   ├── unbound.yml            # Recursive DNS resolver
 │   ├── diun.yml               # Image update notifier (no auto-updates)
 │   ├── diun.md                # Diun setup & how to act on a notification
-│   └── docker-socket-proxy.yml # Read-only Docker API for Diun
+│   ├── dozzle.yml             # Live container log viewer
+│   ├── uptime-kuma.yml        # Uptime monitoring & status page
+│   └── docker-socket-proxy.yml # Read-only Docker API for Diun and Dozzle
 │
 ├── configs/                    # Service configuration files
 │   ├── caddy/
@@ -142,6 +144,10 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - **Never updates anything**; you apply updates with `./scripts/update.sh`
   - Replaced Watchtower after an unattended update broke mealie for three
     months (see [services/diun.md](services/diun.md))
+- **Dozzle** - Live container logs at https://dozzle.lan
+  - Reads through the socket proxy, so it can stream but never control
+  - Login required: logs can carry tokens (see `services/dozzle.yml`)
+- **Uptime Kuma** - Uptime monitoring and status page at https://status.lan
   - Reads Docker through a read-only socket proxy
 
 - **Portainer** - Web-based Docker management
@@ -271,6 +277,8 @@ All services use internal TLS via Caddy:
 - **Mealie**: https://mealie.lan
 - **Vaultwarden**: https://vault.lan
 - **Atuin**: https://atuin.lan
+- **Dozzle**: https://dozzle.lan
+- **Uptime Kuma**: https://status.lan
 - **Proxmox**: https://pve.lan
 - **TrueNAS**: https://truenas.lan
 
@@ -288,7 +296,9 @@ All services use internal TLS via Caddy:
 | Home Assistant | 8123 | — | TCP | Host networking |
 | Tailscale | — | — | — | Host networking |
 | Diun | — | — | — | No published ports |
-| Socket proxy | — | 2375 | TCP | Internal to homelab_network only |
+| Dozzle | — | 8080 | TCP | Via Caddy only |
+| Uptime Kuma | — | 3001 | TCP | Via Caddy only |
+| Socket proxy | — | 2375 | TCP | Internal to homelab_socket_proxy only |
 
 ## Maintenance
 

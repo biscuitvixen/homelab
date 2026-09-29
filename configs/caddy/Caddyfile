@@ -77,6 +77,18 @@ atuin.lan {
   reverse_proxy atuin:8888
 }
 
+dozzle.lan {
+  import tls_internal
+  import access_log
+  reverse_proxy dozzle:8080
+}
+
+status.lan {
+  import tls_internal
+  import access_log
+  reverse_proxy uptime-kuma:3001
+}
+
 # A landing page at https://lab.lan/
 lab.lan {
 	import tls_internal

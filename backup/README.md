@@ -6,7 +6,7 @@ NFS locking do not mix (that's what kept killing mealie). The NAS instead
 receives nightly restic snapshots.
 
 The SQLite-writer containers (mealie, vaultwarden, atuin, homeassistant,
-mosquitto, scarlet) are paused briefly each night for a clean snapshot,
+mosquitto, scarlet, uptime-kuma) are paused briefly each night for a clean snapshot,
 then unpaused unconditionally via a shell trap. AdGuard, unbound, caddy and
 tailscale stay up throughout — pausing adguard would kill DNS for the whole
 LAN, and pausing tailscale would drop remote access.
@@ -37,6 +37,8 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 | `$DATA/mealie` | SQLite DB + images | Recipes |
 | `$DATA/mosquitto` | Persistence store | Retained MQTT messages |
 | `$DATA/scarlet` | SQLite DB | Bot state (user timezones etc) |
+| `$DATA/uptime-kuma` | SQLite DB | Monitors, notifications, heartbeat history |
+| `$DATA/dozzle` | `users.yml` | Log viewer logins (bcrypt hashes) |
 | `$DATA/tailscale` | Node state + `/etc/tailscale` | Node identity — losing it forces re-auth of the node |
 | `$DATA/vaultwarden` | SQLite DB, attachments, RSA keys | The password vault. The single most important path in this table |
 | `<repo>/.env` | Deployed secrets | Required to start the stack. Same security boundary as the restic password file (both plaintext on this host), so no extra exposure |

@@ -6,5 +6,7 @@
   { "name": "🍽️ Mealie",         "href": "https://mealie.lan",   "subtitle": "Recipe management & meal planning" },
   { "name": "🔐 Vaultwarden",    "href": "https://vault.lan",    "subtitle": "Password manager & secrets vault" },
   { "name": "🐚 Atuin",          "href": "https://atuin.lan",    "subtitle": "Shell history sync" },
+  { "name": "📜 Dozzle",         "href": "https://dozzle.lan",   "subtitle": "Live container logs" },
+  { "name": "📈 Uptime Kuma",    "href": "https://status.lan",   "subtitle": "Service uptime monitoring" },
   { "name": "🌐 Router",         "href": "http://192.168.0.1",   "subtitle": "Network router configuration" }
 ]

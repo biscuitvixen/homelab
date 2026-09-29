@@ -37,11 +37,13 @@ hl_load_env() {
     BACKUP_PATHS=(
       "$DATA/adguard/conf"      # AdGuardHome.yaml - filters, rewrites, clients
       "$DATA/atuin"             # shell history sqlite
+      "$DATA/dozzle"            # users.yml (bcrypt hashes for the log viewer)
       "$DATA/caddy/data"        # internal CA + issued certs (trusted by LAN devices)
       "$DATA/homeassistant"     # config + .storage + recorder sqlite
       "$DATA/mealie"            # recipes sqlite + images
       "$DATA/mosquitto"         # retained-message store
-      "$DATA/scarlet"          # bot sqlite (user timezones etc)
+      "$DATA/scarlet"           # bot sqlite (user timezones etc)
+      "$DATA/uptime-kuma"       # monitors + heartbeat history sqlite
       "$DATA/tailscale"         # node identity/state + /etc/tailscale
       "$DATA/vaultwarden"       # vault sqlite + attachments + rsa keys
       # .env carries the Vaultwarden admin token, Discord token, etc. Without
@@ -63,7 +65,8 @@ hl_load_env() {
 #   caddy, adguard, unbound - pausing adguard kills DNS for the whole LAN;
 #     adguard/conf only changes on settings edits, safe to snapshot live
 #   tailscale - would drop remote access mid-backup; state writes are rare
-#   diun, docker-socket-proxy, lavalink - no state worth quiescing
+#   diun, docker-socket-proxy, lavalink, dozzle - no state worth
+#     quiescing; dozzle's users.yml only changes by hand
 #     (diun's DB is a rebuildable cache of registry state)
 #
 # pause/unpause (SIGSTOP/SIGCONT) is used instead of stop/start so Docker
@@ -75,6 +78,7 @@ PAUSE_CONTAINERS=(
   homeassistant
   mosquitto
   scarlet
+  uptime-kuma
 )
 
 # Every service pins container_name:, so plain `docker pause <name>` works.

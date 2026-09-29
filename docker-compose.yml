@@ -81,7 +81,7 @@ services:
       service: docker-socket-proxy
     profiles: ["serv", "pi"]
     networks:
-      - homelab_network
+      - socket_proxy
 
   diun:
     extends:
@@ -90,6 +90,27 @@ services:
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
+    profiles: ["serv", "pi"]
+    networks:
+      - homelab_network
+      - socket_proxy
+
+  dozzle:
+    extends:
+      file: ./services/dozzle.yml
+      service: dozzle
+    depends_on:
+      docker-socket-proxy:
+        condition: service_healthy
+    profiles: ["serv", "pi"]
+    networks:
+      - homelab_network
+      - socket_proxy
+
+  uptime-kuma:
+    extends:
+      file: ./services/uptime-kuma.yml
+      service: uptime-kuma
     profiles: ["serv", "pi"]
     networks:
       - homelab_network
@@ -126,6 +147,14 @@ networks:
   homelab_network:
     driver: bridge
     name: homelab_network
+
+  # Docker API clients and the socket proxy only. internal blocks any
+  # route out of it, so the proxy cannot call out and a compromised
+  # client cannot reach the daemon except through the proxy's filter.
+  socket_proxy:
+    driver: bridge
+    name: homelab_socket_proxy
+    internal: true
 
 volumes:
   # Cached Lavalink plugin jars for Scarlet (chown to uid 322 once, see scarlet.md)

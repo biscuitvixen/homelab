@@ -1,0 +1,32 @@
+# Uptime Kuma - uptime monitoring with a status page, served at
+# https://status.lan through Caddy. Monitors and history live in a
+# SQLite database under ${DATA}/uptime-kuma, which the nightly backup
+# snapshots with the container paused (see backup/lib.sh).
+#
+# The image is Node.js. The x86-64-v1 CPU on this host has been checked
+# against it: Node 22 and the native sqlite3 module both run without
+# SIGILL, so an exit 132 here would mean a newer image moved the
+# baseline, not a config fault.
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma
+    restart: unless-stopped
+    # Ceiling so one service cannot starve the others on a 2 GB host.
+    mem_limit: 256m
+    security_opt:
+      - no-new-privileges:true
+    # The entrypoint drops to its run user with setpriv, which needs
+    # SETUID and SETGID even when the target user is root; without them
+    # the container crash-loops on "setgroups: Operation not permitted".
+    cap_drop: [ALL]
+    cap_add: [SETUID, SETGID]
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    environment:
+      TZ: ${TZ}
+    volumes:
+      - ${DATA:?DATA is not set}/uptime-kuma:/app/data
+    # The image ships its own HEALTHCHECK (extra/healthcheck), which
+    # probes the web server; nothing to add here.

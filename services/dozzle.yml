@@ -1,0 +1,41 @@
+# Dozzle - a live log viewer for every container on the host, served at
+# https://dozzle.lan through Caddy. It reads the Docker API through
+# docker-socket-proxy rather than the raw socket, so it can stream logs
+# but never start, stop or exec anything.
+#
+# Logs are sensitive: Lavalink prints the YouTube OAuth device code and
+# refresh token at link time, and any service may leak a token in a
+# stack trace. Dozzle therefore runs its simple auth provider, which
+# reads ${DATA}/dozzle/users.yml. Generate an entry with:
+#   docker run --rm amir20/dozzle generate --name "Name" --email x@y \
+#     --password 'secret' username > /var/lib/homelab/dozzle/users.yml
+# The file holds a bcrypt hash, not the password, and lives outside git.
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    restart: unless-stopped
+    init: true
+    # Ceiling so one service cannot starve the others on a 2 GB host.
+    mem_limit: 128m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    environment:
+      TZ: ${TZ}
+      DOZZLE_NO_ANALYTICS: "true"
+      # TCP to the proxy instead of a socket mount
+      DOCKER_HOST: tcp://docker-socket-proxy:2375
+      DOZZLE_HOSTNAME: ${SERVER_NAME:-homelab}
+      DOZZLE_AUTH_PROVIDER: simple
+    volumes:
+      - ${DATA:?DATA is not set}/dozzle:/data:ro
+    healthcheck:
+      test: ["CMD", "/dozzle", "healthcheck"]
+      interval: ${HEALTHCHECK_INTERVAL:-30s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-10s}
+      retries: ${HEALTHCHECK_RETRIES:-3}
+      start_period: ${HEALTHCHECK_START_PERIOD:-10s}

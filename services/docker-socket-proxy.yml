@@ -1,29 +1,46 @@
-# A read-only filter in front of the Docker socket, so Diun can enumerate
-# running containers without being able to control the daemon. Anything
-# with the raw socket bind-mounted can create, start and delete
-# containers; that was acceptable for watchtower because controlling
-# containers was its whole job, and is not acceptable for a service whose
-# only job is to look.
+# A read-only filter in front of the Docker socket. Anything with the raw
+# socket bind-mounted can create, start and delete containers, which is
+# far more than a service whose only job is to look should hold. Two
+# clients sit behind it: Diun, which enumerates running containers and
+# inspects their images, and Dozzle, which streams container logs.
 #
-# Every permission defaults to denied. CONTAINERS=1 is the single grant
-# Diun needs (list plus inspect). If Diun ever logs a 403, read the log
-# and add one variable at a time rather than opening POST.
+# Every permission defaults to denied and POST stays off, so nothing
+# behind the proxy can change the daemon's state. If a client logs a
+# 403, read its log and add one GET endpoint at a time rather than
+# opening POST.
+#
+# The proxy sits only on the internal socket_proxy network (no route to
+# the internet or the rest of the stack); clients join that network in
+# addition to homelab_network.
 services:
   docker-socket-proxy:
     image: tecnativa/docker-socket-proxy:latest
     container_name: docker-socket-proxy
     restart: unless-stopped
-    # Ceiling so one service cannot starve the other twelve on a 2 GB
-    # host. Measured ~20 MB.
+    init: true
+    # Ceiling so one service cannot starve the others on a 2 GB host.
+    # Measured ~20 MB.
     mem_limit: 64m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    read_only: true
+    # haproxy writes its pid and stats socket under /run
+    tmpfs:
+      - /tmp:size=8m,mode=1777
+      - /run:size=8m,mode=755
     environment:
-      # Diun needs both: CONTAINERS to enumerate what is running, and
-      # IMAGES to inspect each container's image for its RepoDigest.
-      # CONTAINERS alone yields a 403 on every container ("Cannot inspect
-      # image" in the Diun log). Both are GET-only; POST stays denied, so
-      # nothing here can create, start or delete anything.
+      # Diun: CONTAINERS to enumerate what is running, IMAGES to inspect
+      # each container's image for its RepoDigest. CONTAINERS alone
+      # yields a 403 on every container ("Cannot inspect image").
       CONTAINERS: "1"
       IMAGES: "1"
+      # Dozzle: EVENTS for start/stop notifications, LOGS for the log
+      # stream itself, INFO for the host summary on its front page.
+      EVENTS: "1"
+      LOGS: "1"
+      INFO: "1"
+      VERSION: "1"
       # Explicitly denied. Listed rather than omitted so the intent is
       # visible in the file and nobody has to remember the defaults.
       POST: "0"
@@ -36,7 +53,6 @@ services:
       CONFIGS: "0"
       SWARM: "0"
       NODES: "0"
-      INFO: "0"
       AUTH: "0"
       BUILD: "0"
       COMMIT: "0"
@@ -44,13 +60,13 @@ services:
       PLUGINS: "0"
       SESSION: "0"
       SYSTEM: "0"
-      VERSION: "1"
     volumes:
-      # Bind mount docker to allow it to access the Docker daemon socket.
       # Read-only: the proxy never needs to write to the socket itself.
       - /var/run/docker.sock:/var/run/docker.sock:ro
     healthcheck:
-      test: ["CMD-SHELL", "nc -z 127.0.0.1 2375 || exit 1"]
+      # /_ping is allowed by default (PING=1) and is the canonical "daemon
+      # reachable" probe; it exposes nothing sensitive.
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:2375/_ping"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
       timeout: ${HEALTHCHECK_TIMEOUT:-10s}
       retries: ${HEALTHCHECK_RETRIES:-3}
