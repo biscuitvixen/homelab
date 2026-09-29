@@ -19,10 +19,10 @@
   include_tags:
     - ^v?\d+\.\d+\.\d+$
 
-# Scarlett's CI publishes only a moving :latest tag, so the global
+# Scarlet's CI publishes only a moving :latest tag, so the global
 # three-part-semver includeTags filter matches nothing and the Docker
 # provider records her as unwatched. Pinning the entry to :latest with
 # watch_repo off tracks that tag by digest instead, which is the right
 # signal for a continuously published image.
-- name: ghcr.io/biscuitvixen/scarlett_ai:latest
+- name: ghcr.io/biscuitvixen/scarlet:latest
   watch_repo: false

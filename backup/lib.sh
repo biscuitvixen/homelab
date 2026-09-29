@@ -41,7 +41,7 @@ hl_load_env() {
       "$DATA/homeassistant"     # config + .storage + recorder sqlite
       "$DATA/mealie"            # recipes sqlite + images
       "$DATA/mosquitto"         # retained-message store
-      "$DATA/scarlett"          # bot sqlite (user timezones etc)
+      "$DATA/scarlet"          # bot sqlite (user timezones etc)
       "$DATA/tailscale"         # node identity/state + /etc/tailscale
       "$DATA/vaultwarden"       # vault sqlite + attachments + rsa keys
       # .env carries the Vaultwarden admin token, Discord token, etc. Without
@@ -52,7 +52,7 @@ hl_load_env() {
     )
     # NOT backed up: $DATA/adguard/work (query log + stats, rebuilt from
     # conf), $DATA/caddy/config (admin API autosave, rebuilt from the
-    # Caddyfile), and the scarlett_lavalink_plugins volume (plugin jars
+    # Caddyfile), and the scarlet_lavalink_plugins volume (plugin jars
     # re-download on start).
 }
 
@@ -63,7 +63,7 @@ hl_load_env() {
 #   caddy, adguard, unbound - pausing adguard kills DNS for the whole LAN;
 #     adguard/conf only changes on settings edits, safe to snapshot live
 #   tailscale - would drop remote access mid-backup; state writes are rare
-#   diun, docker-socket-proxy, scarlett-lavalink - no state worth quiescing
+#   diun, docker-socket-proxy, lavalink - no state worth quiescing
 #     (diun's DB is a rebuildable cache of registry state)
 #
 # pause/unpause (SIGSTOP/SIGCONT) is used instead of stop/start so Docker
@@ -74,12 +74,12 @@ PAUSE_CONTAINERS=(
   atuin
   homeassistant
   mosquitto
-  scarlett-bot
+  scarlet
 )
 
 # Every service pins container_name:, so plain `docker pause <name>` works.
 # Both helpers filter PAUSE_CONTAINERS to what's actually in the relevant
-# state - a profile that doesn't run e.g. scarlett-bot must not abort the
+# state - a profile that doesn't run e.g. scarlet must not abort the
 # whole nightly job under set -e.
 hl_pausable_containers() {
     comm -12 \

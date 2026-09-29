@@ -94,20 +94,20 @@ services:
     networks:
       - homelab_network
 
-  scarlett-lavalink:
+  lavalink:
     extends:
-      file: ./services/scarlett.yml
-      service: scarlett-lavalink
+      file: ./services/scarlet.yml
+      service: lavalink
     profiles: ["serv", "ai"]
     networks:
       - homelab_network
 
-  scarlett-bot:
+  scarlet:
     extends:
-      file: ./services/scarlett.yml
-      service: scarlett-bot
+      file: ./services/scarlet.yml
+      service: scarlet
     depends_on:
-      scarlett-lavalink:
+      lavalink:
         condition: service_healthy
     profiles: ["serv", "ai"]
     networks:
@@ -128,5 +128,5 @@ networks:
     name: homelab_network
 
 volumes:
-  # Cached Lavalink plugin jars for Scarlett (chown to uid 322 once, see scarlett.md)
-  scarlett_lavalink_plugins:
+  # Cached Lavalink plugin jars for Scarlet (chown to uid 322 once, see scarlet.md)
+  scarlet_lavalink_plugins:

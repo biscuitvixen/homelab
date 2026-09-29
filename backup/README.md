@@ -6,7 +6,7 @@ NFS locking do not mix (that's what kept killing mealie). The NAS instead
 receives nightly restic snapshots.
 
 The SQLite-writer containers (mealie, vaultwarden, atuin, homeassistant,
-mosquitto, scarlett-bot) are paused briefly each night for a clean snapshot,
+mosquitto, scarlet) are paused briefly each night for a clean snapshot,
 then unpaused unconditionally via a shell trap. AdGuard, unbound, caddy and
 tailscale stay up throughout — pausing adguard would kill DNS for the whole
 LAN, and pausing tailscale would drop remote access.
@@ -36,7 +36,7 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 | `$DATA/homeassistant` | Config, `.storage`, recorder SQLite | Automations, integrations, entity registry, history |
 | `$DATA/mealie` | SQLite DB + images | Recipes |
 | `$DATA/mosquitto` | Persistence store | Retained MQTT messages |
-| `$DATA/scarlett` | SQLite DB | Bot state (user timezones etc) |
+| `$DATA/scarlet` | SQLite DB | Bot state (user timezones etc) |
 | `$DATA/tailscale` | Node state + `/etc/tailscale` | Node identity — losing it forces re-auth of the node |
 | `$DATA/vaultwarden` | SQLite DB, attachments, RSA keys | The password vault. The single most important path in this table |
 | `<repo>/.env` | Deployed secrets | Required to start the stack. Same security boundary as the restic password file (both plaintext on this host), so no extra exposure |
@@ -44,7 +44,7 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 Not backed up: `$DATA/adguard/work` (query log + stats, rebuilt from conf),
 `$DATA/caddy/config` (admin API autosave, rebuilt from the Caddyfile),
 `$DATA/vaultwarden/icon_cache`, `$DATA/homeassistant/{deps,tts}`, `*.log`,
-and the `scarlett_lavalink_plugins` volume (plugin jars re-download on start).
+and the `scarlet_lavalink_plugins` volume (plugin jars re-download on start).
 
 ## Setup
 

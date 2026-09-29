@@ -86,9 +86,9 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - Home Assistant
   - Mosquitto MQTT broker
 
-- **`ai`** - Scarlett Discord bot
+- **`ai`** - Scarlet Discord bot
   - Bot + Lavalink (audio); the LLM runs on the GPU host (the Spark)
-  - See [services/scarlett.md](services/scarlett.md)
+  - See [services/scarlet.md](services/scarlet.md)
 
 ## Services Overview
 
