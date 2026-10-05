@@ -27,7 +27,10 @@ one of. The site flags are what used to live in `TS_ARGS`:
 | office  | none; it sits on a guest network and must not advertise anything |
 
 Routes and exit nodes still need approving in the admin console under
-Machines. The tailscale SSH ACL and the global nameserver list are also
+Machines. Leave `--accept-routes` off on the home hosts: they sit on
+192.168.0.0/24 themselves, and accepting that route from the other
+advertiser would send their own LAN traffic through the tailnet. The
+"peers are advertising routes" warning from `tailscale up` is that. The tailscale SSH ACL and the global nameserver list are also
 admin-console settings; see the replication section of
 [backup/README.md](../backup/README.md).
 
