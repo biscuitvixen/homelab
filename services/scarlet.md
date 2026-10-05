@@ -6,10 +6,10 @@ Only the CPU parts run in the homelab, `scarlet` and `lavalink` (its audio serve
 
 ## Profile
 
-Runs under the `serv` profile, and has its own `ai` profile to bring it up alone:
+Runs under the `serv` profile. To bring up just the pair:
 
 ```sh
-docker compose --profile ai up -d
+docker compose up -d scarlet lavalink
 ```
 
 ## First-run setup
