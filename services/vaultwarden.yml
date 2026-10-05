@@ -12,7 +12,7 @@ services:
       TZ: ${TZ}
       DOMAIN: "${VAULTWARDEN_DOMAIN:-https://vault.lan}"
       # Disable signups after creating your account
-      SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS_ALLOWED:-true}"
+      SIGNUPS_ALLOWED: "${VAULTWARDEN_SIGNUPS_ALLOWED:-false}"
       # Set a long random string to enable the admin panel at /admin
       ADMIN_TOKEN: "${VAULTWARDEN_ADMIN_TOKEN}"
     volumes:
