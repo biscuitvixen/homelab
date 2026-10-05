@@ -85,18 +85,6 @@ set without a `--profile` flag.
   - Same `${DATA}` path as the server (local disk, or tmpfs on a Pi that
     should hold nothing at rest)
 
-- **`dns`** - DNS services only
-  - AdGuard Home
-  - Unbound resolver
-  - Caddy reverse proxy
-
-- **`iot`** - IoT & home automation
-  - Home Assistant
-  - Mosquitto MQTT broker
-
-- **`ai`** - Scarlet Discord bot
-  - Bot + Lavalink (audio); the LLM runs on the GPU host (the Spark)
-  - See [services/scarlet.md](services/scarlet.md)
 
 ## Services Overview
 
@@ -218,21 +206,11 @@ With `COMPOSE_PROFILES` set in `.env`, on any host:
 docker compose up -d
 ```
 
-The narrower profiles below are for one-off use and still take the flag.
-
-**DNS services only:**
+To act on a subset, name the services rather than reaching for a
+profile:
 ```bash
-docker compose --profile dns up -d
-```
-
-**IoT services only:**
-```bash
-docker compose --profile iot up -d
-```
-
-**Combine profiles:**
-```bash
-docker compose --profile serv --profile iot up -d
+docker compose restart adguard unbound caddy
+docker compose up -d scarlet lavalink
 ```
 
 ## Web Dashboard

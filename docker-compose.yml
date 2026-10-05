@@ -4,7 +4,7 @@ services:
     extends:
       file: ./services/unbound.yml
       service: unbound
-    profiles: ["serv", "replica", "dns"]
+    profiles: ["serv", "replica"]
     networks:
       - homelab_network
 
@@ -15,7 +15,7 @@ services:
     depends_on:
       unbound:
         condition: service_healthy
-    profiles: ["serv", "replica", "dns"]
+    profiles: ["serv", "replica"]
     networks:
       - homelab_network
 
@@ -23,7 +23,7 @@ services:
     extends:
       file: ./services/caddy.yml
       service: caddy
-    profiles: ["serv", "replica", "dns"]
+    profiles: ["serv", "replica"]
     networks:
       - homelab_network
 
@@ -31,19 +31,19 @@ services:
     extends:
       file: ./services/homeassistant.yml
       service: homeassistant
-    profiles: ["serv", "iot"]
+    profiles: ["serv"]
 
   mosquitto:
     extends:
       file: ./services/mosquitto.yml
       service: mosquitto
-    profiles: ["serv", "iot"]
+    profiles: ["serv"]
 
 #  matter-server:
 #    extends:
 #      file: ./services/matter.yml
 #      service: matter-server
-#    profiles: ["serv", "iot"]
+#    profiles: ["serv"]
 
   atuin:
     extends:
@@ -113,7 +113,7 @@ services:
     extends:
       file: ./services/scarlet.yml
       service: lavalink
-    profiles: ["serv", "ai"]
+    profiles: ["serv"]
     networks:
       - homelab_network
 
@@ -124,7 +124,7 @@ services:
     depends_on:
       lavalink:
         condition: service_healthy
-    profiles: ["serv", "ai"]
+    profiles: ["serv"]
     networks:
       - homelab_network
 
