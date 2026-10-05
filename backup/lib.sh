@@ -4,6 +4,7 @@
 # Sourced by:
 #   backup.sh       - nightly systemd job (env comes from EnvironmentFile)
 #   backup-cli.sh   - interactive ops tool (env sourced from $ENV_FILE here)
+#   replicate.sh    - nightly push of the replica subset to the Pis
 #   scripts/migrate-to-local.sh - one-shot migration off the NFS mount
 #
 # Defines: paths, container set, RESTIC_NICE, and the restic invocations
@@ -31,7 +32,10 @@ hl_load_env() {
         . "$ENV_FILE"
     fi
     DATA="${DATA:-/var/lib/homelab}"
-    export RESTIC_PASSWORD LOCAL_REPOSITORY REMOTE_MOUNT REMOTE_REPOSITORY DATA
+    # Space-separated tailscale hostnames of the replica Pis. Empty means
+    # replicate.sh has nothing to do.
+    REPLICAS="${REPLICAS:-}"
+    export RESTIC_PASSWORD LOCAL_REPOSITORY REMOTE_MOUNT REMOTE_REPOSITORY DATA REPLICAS
     export RESTIC_REPOSITORY="$LOCAL_REPOSITORY"
 
     BACKUP_PATHS=(
@@ -56,6 +60,16 @@ hl_load_env() {
     # Caddyfile), the scarlet_lavalink_plugins volume (plugin jars
     # re-download on start), and tailscale state (host package, lives in
     # /var/lib/tailscale; a rebuilt host re-auths instead).
+
+    # The subset of BACKUP_PATHS that replicate.sh pushes to the replica
+    # profile, relative to $DATA so the same list addresses both the
+    # restored snapshot and the replica's data dir. Each entry maps to the
+    # container that must be stopped while its files are replaced.
+    REPLICA_PATHS=(
+      adguard/conf              # filters, rewrites, clients -> adguard
+      caddy/data                # internal CA + certs, so vault.lan verifies -> caddy
+      vaultwarden               # vault sqlite + attachments + rsa keys -> vaultwarden
+    )
 }
 
 # Containers to pause during backup: the SQLite/state writers, so their DBs
