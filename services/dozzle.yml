@@ -32,7 +32,7 @@ services:
       DOZZLE_HOSTNAME: ${SERVER_NAME:-homelab}
       DOZZLE_AUTH_PROVIDER: simple
     volumes:
-      - ${DATA:?DATA is not set}/dozzle:/data:ro
+      - ${DATA:?DATA is not set}/dozzle:/data
     healthcheck:
       test: ["CMD", "/dozzle", "healthcheck"]
       interval: ${HEALTHCHECK_INTERVAL:-30s}
