@@ -21,8 +21,8 @@ one of. The site flags are what used to live in `TS_ARGS`:
 
 | host    | site flags                                                       |
 |---------|------------------------------------------------------------------|
-| skypaw  | none                                                             |
-| asteria | `--advertise-routes=192.168.0.0/24` (the only home subnet router) |
+| skypaw  | `--advertise-routes=192.168.0.0/24 --advertise-exit-node`        |
+| asteria | `--advertise-routes=192.168.0.0/24` (home subnet router failover) |
 | acrux   | `--advertise-exit-node`                                          |
 | office  | none; it sits on a guest network and must not advertise anything |
 
@@ -45,7 +45,8 @@ systemctl stop tailscaled
 cp /var/lib/homelab/tailscale/state/tailscaled.state /var/lib/tailscale/
 chmod 600 /var/lib/tailscale/tailscaled.state
 systemctl start tailscaled
-tailscale up --reset --ssh --accept-dns=false --hostname=skypaw
+tailscale up --reset --ssh --accept-dns=false --hostname=skypaw \
+    --advertise-routes=192.168.0.0/24 --advertise-exit-node
 tailscale status --peers=false   # same IP as before, no re-auth
 ```
 
@@ -57,7 +58,7 @@ the restic path list.
 ```bash
 tailscale status --peers=false
 tailscale netcheck                # DERP-relayed on guest wifi is expected
-cat /proc/sys/net/ipv4/ip_forward # 1 on asteria and acrux
+cat /proc/sys/net/ipv4/ip_forward # 1 on skypaw, asteria and acrux
 ```
 
 IP forwarding is only needed on hosts that advertise routes or act as
