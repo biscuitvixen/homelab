@@ -20,9 +20,8 @@ homelab/
 │   ├── atuin.yml              # Shell history sync server
 │   ├── portainer.yml          # Docker container management UI
 │   ├── samba.yml              # Network file sharing (optional)
-│   ├── tailscale.yml          # VPN with dual-mode support
 │   ├── vaultwarden.yml        # Bitwarden-compatible password manager
-│   ├── tailscale.md           # Detailed Tailscale setup guide
+│   ├── tailscale.md           # Tailscale host install and per-site flags
 │   ├── unbound.yml            # Recursive DNS resolver
 │   ├── diun.yml               # Image update notifier (no auto-updates)
 │   ├── diun.md                # Diun setup & how to act on a notification
@@ -100,10 +99,10 @@ This homelab uses Docker Compose profiles to support different deployment scenar
   - Reverse proxies for AdGuard, Home Assistant, TrueNAS, and Proxmox
   - Automatic certificate management
 
-- **Tailscale** - Zero-config VPN
-  - State under `${DATA}/tailscale` on the local disk
-  - Configure via `TS_ARGS` environment variable for SSH access, exit nodes, and route advertising
-  - See [services/tailscale.md](services/tailscale.md) for detailed setup
+- **Tailscale** - Zero-config VPN, installed on the host rather than in
+  the stack
+  - Tailscale SSH is the channel skypaw pushes replica data over
+  - See [services/tailscale.md](services/tailscale.md) for the per-site flags
 
 ### DNS & Security
 - **AdGuard Home** - Network-wide ad blocking and DNS filtering
@@ -165,7 +164,7 @@ Track the working status of each service:
 
 ### Core Services
 - ~~ **Samba** - Network file sharing~~
-- [x] **Tailscale** - VPN access (server & Pi configurations)
+- [x] **Tailscale** - VPN access (host package on every box)
 - [x] **AdGuard** - DNS ad blocking
 - [x] **Unbound** - DNS resolver
 - [x] **Caddy** - Reverse proxy & HTTPS
@@ -294,7 +293,6 @@ All services use internal TLS via Caddy:
 | Atuin | 8888 | 8888 | TCP | Shell history sync API |
 | Vaultwarden | 8080 | 80 | TCP | Password manager & web vault |
 | Home Assistant | 8123 | — | TCP | Host networking |
-| Tailscale | — | — | — | Host networking |
 | Diun | — | — | — | No published ports |
 | Dozzle | — | 8080 | TCP | Via Caddy only |
 | Uptime Kuma | — | 3001 | TCP | Via Caddy only |
@@ -337,15 +335,11 @@ After editing the Caddyfile, reload without downtime:
 docker compose --profile serv exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
-## Tailscale Setup
+## Tailscale
 
-For detailed Tailscale configuration including:
-- IP forwarding setup
-- Exit node configuration
-- Subnet route advertising
-- Troubleshooting
-
-See the comprehensive guide: [services/tailscale.md](services/tailscale.md)
+Runs as a host package on every box. Install, per-site flags, the skypaw
+migration off the old container and the forwarding sysctls are in
+[services/tailscale.md](services/tailscale.md).
 
 ## Health Checks
 
@@ -354,7 +348,6 @@ Most services include health checks for monitoring:
 - **Unbound**: DNS query test
 - **Caddy**: Configuration validation
 - **Home Assistant**: HTTP endpoint check
-- **Tailscale**: Peer status check
 - **Atuin**: HTTP check on `/healthz`
 - **Vaultwarden**: HTTP check on `/alive` (verifies database)
 
@@ -394,7 +387,7 @@ docker inspect <container-name> | grep -A 10 Health
 ### Common Issues
 
 **Tailscale not connecting:**
-- See [services/tailscale.md](services/tailscale.md)
+- `tailscale status --peers=false` on the host; see [services/tailscale.md](services/tailscale.md)
 
 **DNS not resolving:**
 - Ensure AdGuard upstream is set to `unbound:53`

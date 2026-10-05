@@ -3,7 +3,7 @@
 #
 # Pauses the SQLite-writer containers briefly for a clean snapshot, then
 # unpauses them via a trap so they always come back up even if restic fails.
-# DNS/TLS (adguard, unbound, caddy) and tailscale stay up throughout.
+# DNS/TLS (adguard, unbound, caddy) stay up throughout.
 #
 # Two-stage backup:
 #   1. restic → local repo on the host disk (always runs, fast)

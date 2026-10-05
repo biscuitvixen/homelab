@@ -1,11 +1,5 @@
 services:
 
-  tailscale:
-    extends:
-      file: ./services/tailscale.yml
-      service: tailscale
-    profiles: ["serv", "pi"]
-
   unbound:
     extends:
       file: ./services/unbound.yml

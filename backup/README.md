@@ -39,14 +39,15 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 | `$DATA/scarlet` | SQLite DB | Bot state (user timezones etc) |
 | `$DATA/uptime-kuma` | SQLite DB | Monitors, notifications, heartbeat history |
 | `$DATA/dozzle` | `users.yml` | Log viewer logins (bcrypt hashes) |
-| `$DATA/tailscale` | Node state + `/etc/tailscale` | Node identity — losing it forces re-auth of the node |
 | `$DATA/vaultwarden` | SQLite DB, attachments, RSA keys | The password vault. The single most important path in this table |
 | `<repo>/.env` | Deployed secrets | Required to start the stack. Same security boundary as the restic password file (both plaintext on this host), so no extra exposure |
 
 Not backed up: `$DATA/adguard/work` (query log + stats, rebuilt from conf),
 `$DATA/caddy/config` (admin API autosave, rebuilt from the Caddyfile),
 `$DATA/vaultwarden/icon_cache`, `$DATA/homeassistant/{deps,tts}`, `*.log`,
-and the `scarlet_lavalink_plugins` volume (plugin jars re-download on start).
+the `scarlet_lavalink_plugins` volume (plugin jars re-download on start),
+and tailscale state (host package under `/var/lib/tailscale`; a rebuilt
+host re-auths, which is one command).
 
 ## Setup
 
