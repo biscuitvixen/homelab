@@ -4,7 +4,7 @@ services:
     extends:
       file: ./services/unbound.yml
       service: unbound
-    profiles: ["serv", "pi", "dns"]
+    profiles: ["serv", "replica", "dns"]
     networks:
       - homelab_network
 
@@ -15,7 +15,7 @@ services:
     depends_on:
       unbound:
         condition: service_healthy
-    profiles: ["serv", "dns"]
+    profiles: ["serv", "replica", "dns"]
     networks:
       - homelab_network
 
@@ -23,7 +23,7 @@ services:
     extends:
       file: ./services/caddy.yml
       service: caddy
-    profiles: ["serv", "dns"]
+    profiles: ["serv", "replica", "dns"]
     networks:
       - homelab_network
 
@@ -57,7 +57,7 @@ services:
     extends:
       file: ./services/vaultwarden.yml
       service: vaultwarden
-    profiles: ["serv"]
+    profiles: ["serv", "replica"]
     networks:
       - homelab_network
 
@@ -73,7 +73,7 @@ services:
     extends:
       file: ./services/docker-socket-proxy.yml
       service: docker-socket-proxy
-    profiles: ["serv", "pi"]
+    profiles: ["serv"]
     networks:
       - socket_proxy
 
@@ -84,7 +84,7 @@ services:
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
-    profiles: ["serv", "pi"]
+    profiles: ["serv"]
     networks:
       - homelab_network
       - socket_proxy
@@ -96,7 +96,7 @@ services:
     depends_on:
       docker-socket-proxy:
         condition: service_healthy
-    profiles: ["serv", "pi"]
+    profiles: ["serv"]
     networks:
       - homelab_network
       - socket_proxy
@@ -105,7 +105,7 @@ services:
     extends:
       file: ./services/uptime-kuma.yml
       service: uptime-kuma
-    profiles: ["serv", "pi"]
+    profiles: ["serv"]
     networks:
       - homelab_network
 

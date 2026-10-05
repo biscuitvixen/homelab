@@ -35,7 +35,7 @@ healthy.
    ```
 3. **Start it and confirm the notifier works.**
    ```sh
-   docker compose --profile serv up -d docker-socket-proxy diun
+   docker compose up -d docker-socket-proxy diun
    docker exec diun diun notif test
    ```
    A test message should appear in the channel. If it doesn't, check
@@ -98,7 +98,7 @@ no root privileges of its own.
   upstream image is watched through `configs/diun/watch.yml` instead. A
   notification for it means: bump the pinned `FROM` tag in
   `services/mealie/Dockerfile`, then
-  `docker compose --profile serv build mealie && docker compose --profile serv up -d mealie`.
+  `docker compose build mealie && docker compose up -d mealie`.
   Do not expect `update.sh` to move it.
 - **Tag filtering:** `DIUN_DEFAULTS_INCLUDETAGS` only accepts three-part
   semver (`v1.2.3` or `1.2.3`), and `MAXTAGS=1` reports just the newest.

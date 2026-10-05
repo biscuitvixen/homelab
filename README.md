@@ -68,15 +68,22 @@ This homelab uses Docker Compose profiles to support different deployment scenar
 
 ### Available Profiles
 
-- **`serv`** - Full server deployment (Proxmox LXC)
+Each host names its profile once, as `COMPOSE_PROFILES` in its `.env`,
+so plain `docker compose up -d` and `scripts/update.sh` act on the right
+set without a `--profile` flag.
+
+- **`serv`** - Full server deployment (skypaw, Proxmox LXC)
   - Includes all core services
   - Stateful data under `${DATA}` on the local disk
-  - Tailscale VPN with custom arguments
+  - Source of truth for everything the replicas carry
 
-- **`pi`** - Raspberry Pi deployment
-  - Tailscale VPN (typically configured as exit node)
-  - Same `${DATA}` path as the server (local disk)
-  - Advertises local network routes via `TS_ARGS`
+- **`replica`** - Raspberry Pi at each site (home, parents', office)
+  - AdGuard + Unbound, serving that site's LAN and the tailnet
+  - Caddy + Vaultwarden as a warm standby of the vault
+  - Receives `adguard/conf`, `caddy/data` and `vaultwarden` from skypaw
+    nightly via `backup/replicate.sh`; never edited in place
+  - Same `${DATA}` path as the server (local disk, or tmpfs on a Pi that
+    should hold nothing at rest)
 
 - **`dns`** - DNS services only
   - AdGuard Home
@@ -202,21 +209,16 @@ Required variables:
 - `TZ` - Your timezone (e.g., `Europe/London`)
 - `DATA` - Local path for stateful service data (default `/var/lib/homelab`; same on server and Pi, never an NFS mount)
 - `PUID`/`PGID` - User/group IDs for file permissions
-- `TS_AUTHKEY` - Tailscale authentication key
-- `TS_HOSTNAME` - Hostname for your Tailscale node
-- `TS_ARGS` - Tailscale arguments (e.g., `--ssh --advertise-exit-node --advertise-routes=192.168.0.0/24`)
+- `COMPOSE_PROFILES` - `serv` on the server, `replica` on a Pi
 
 ### 3. Deploy Services
 
-**For Proxmox LXC (full server):**
+With `COMPOSE_PROFILES` set in `.env`, on any host:
 ```bash
-docker compose --profile serv up -d
+docker compose up -d
 ```
 
-**For Raspberry Pi (exit node):**
-```bash
-docker compose --profile pi up -d
-```
+The narrower profiles below are for one-off use and still take the flag.
 
 **DNS services only:**
 ```bash
@@ -332,7 +334,7 @@ its pinned tag bumped and a rebuild. See [services/diun.md](services/diun.md).
 ### Reload Caddy
 After editing the Caddyfile, reload without downtime:
 ```bash
-docker compose --profile serv exec caddy caddy reload --config /etc/caddy/Caddyfile
+docker compose exec caddy caddy reload --config /etc/caddy/Caddyfile
 ```
 
 ## Tailscale

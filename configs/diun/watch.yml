@@ -26,3 +26,10 @@
 # signal for a continuously published image.
 - name: ghcr.io/biscuitvixen/scarlet:latest
   watch_repo: false
+
+# The replicas run the arm build of unbound, a different image name from
+# the amd64 one running here. Diun does not run on the replicas, so this
+# host watches the image on their behalf. It publishes a moving :latest
+# only, hence tracking by digest like scarlet above.
+- name: mvance/unbound-rpi:latest
+  watch_repo: false
