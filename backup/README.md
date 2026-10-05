@@ -77,6 +77,7 @@ LOCAL_REPOSITORY=/var/backups/homelab-restic
 REMOTE_MOUNT=/mnt/skypaw-core
 REMOTE_REPOSITORY=/mnt/skypaw-core/backups/homelab-restic
 DATA=/var/lib/homelab
+REPLICAS="asteria acrux"
 EOF
 sudo chmod 600 /etc/restic/homelab.env
 ```
@@ -154,10 +155,15 @@ WantedBy=timers.target
 
 Enable it:
 ```bash
-chmod +x backup/backup.sh backup/backup-cli.sh
+chmod +x backup/backup.sh backup/backup-cli.sh backup/replicate.sh
 sudo systemctl daemon-reload
 sudo systemctl enable --now backup-homelab.timer
 ```
+
+The replica push has its own pair, `replicate-homelab.service` and
+`.timer`, identical in shape with `ExecStart=/opt/homelab/backup/replicate.sh`
+and `OnCalendar=*-*-* 04:30:00`, so it always runs against the snapshot
+the 04:00 job just wrote.
 
 ## Verify
 
