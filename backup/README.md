@@ -131,7 +131,7 @@ After=docker.service
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/restic/homelab.env
-ExecStart=/opt/homelab/backup/backup.sh
+ExecStart=/home/containersvc/homelab/backup/backup.sh
 User=root
 ```
 
@@ -158,7 +158,7 @@ sudo systemctl enable --now backup-homelab.timer
 ```
 
 The replica push has its own pair, `replicate-homelab.service` and
-`.timer`, identical in shape with `ExecStart=/opt/homelab/backup/replicate.sh`
+`.timer`, identical in shape with `ExecStart=/home/containersvc/homelab/backup/replicate.sh`
 and `OnCalendar=*-*-* 04:30:00`, so it always runs against the snapshot
 the 04:00 job just wrote.
 
