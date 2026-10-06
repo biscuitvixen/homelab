@@ -32,8 +32,6 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 |------|----------|-----|
 | `$DATA/adguard/conf` | AdGuardHome.yaml | Filters, DNS rewrites, clients, admin login |
 | `$DATA/atuin` | SQLite DB | Synced shell history |
-| `$DATA/adguard/work/data` | `querylog.json*`, `stats.db` | 90 days of query history and the dashboard statistics. The log is ~1.7 GB but changes by a day's queries each night |
-| `$DATA/caddy/logs` | `access.log*` | Rolling access log, rolled by caddy at 50 MiB, 20 files or 90 days |
 | `$DATA/caddy/data` | Internal CA + issued certs | LAN devices trust this CA — losing it means re-installing the root cert everywhere |
 | `$DATA/homeassistant` | Config, `.storage`, recorder SQLite | Automations, integrations, entity registry, history |
 | `$DATA/mealie` | SQLite DB + images | Recipes |
@@ -44,10 +42,9 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 | `$DATA/vaultwarden` | SQLite DB, attachments, RSA keys | The password vault. The single most important path in this table |
 | `<repo>/.env` | Deployed secrets | Required to start the stack. Same security boundary as the restic password file (both plaintext on this host), so no extra exposure |
 
-Not backed up: `$DATA/adguard/work/data/filters` (downloaded filter lists,
-refetched on start), `$DATA/caddy/config` (admin API autosave, rebuilt from
-the Caddyfile), `$DATA/vaultwarden/icon_cache`,
-`$DATA/homeassistant/{deps,tts}`, Home Assistant's and Mealie's own logs,
+Not backed up: `$DATA/adguard/work` (query log + stats, rebuilt from conf),
+`$DATA/caddy/config` (admin API autosave, rebuilt from the Caddyfile),
+`$DATA/vaultwarden/icon_cache`, `$DATA/homeassistant/{deps,tts}`, `*.log`,
 the `scarlet_lavalink_plugins` volume (plugin jars re-download on start),
 and tailscale state (host package under `/var/lib/tailscale`; a rebuilt
 host re-auths, which is one command).
@@ -161,7 +158,7 @@ sudo systemctl enable --now backup-homelab.timer
 ```
 
 The replica push has its own pair, `replicate-homelab.service` and
-`.timer`, identical in shape with `ExecStart=/opt/homelab/backup/replicate.sh`
+`.timer`, identical in shape with `ExecStart=/home/containersvc/homelab/backup/replicate.sh`
 and `OnCalendar=*-*-* 04:30:00`, so it always runs against the snapshot
 the 04:00 job just wrote.
 
@@ -282,3 +279,42 @@ sudo -E restic -r "$REMOTE_REPOSITORY" restore latest --target /
 Then fix ownership for the non-root writer (`chown -R 1883:1883
 /var/lib/homelab/mosquitto`), reinstall the systemd units, and
 `docker compose up -d`.
+
+## Replication
+
+Every Pi in the `replica` profile carries a copy of three trees from the
+latest nightly snapshot: `adguard/conf`, `caddy/data` and `vaultwarden`.
+`backup/replicate.sh` restores them here and pushes them out; the replicas
+hold no restic password and never see the repo, only plain files over
+tailscale SSH.
+
+Per host it takes a dry rsync to learn which trees changed, stops only the
+containers that own them, copies, and brings them back with `compose up`.
+Most nights only the vault moves, so replica DNS is untouched. A replica
+that is off (the office Pi at the weekend) is a warning and the rest still
+run; a failed copy is an error and the timer shows it.
+
+Because skypaw is the source of truth, a setting changed on a replica's
+AdGuard is reverted on the next push. Change it on skypaw.
+
+```bash
+sudo backup/replicate.sh --dry-run            # what each host would receive
+sudo backup/replicate.sh --only asteria       # one host, e.g. after a rebuild
+```
+
+What the replicas need:
+- `REPLICAS` in `/etc/restic/homelab.env`: tailscale hostnames, space
+  separated. The script resolves them with `tailscale ip`, not DNS.
+- A tailscale SSH ACL letting this host reach `root` on each. The push
+  runs as root on the replica so it can replace files the containers
+  rewrote as root and keep skypaw's ownership.
+- The repo checked out with `COMPOSE_PROFILES=replica` in its `.env` and
+  the same `DATA` path as here. `REPLICA_COMPOSE_DIR` in
+  `/etc/restic/homelab.env` names the checkout when it is not
+  `/home/containersvc/homelab`.
+- `VAULTWARDEN_SIGNUPS_ALLOWED=false`, which is now the compose default.
+
+Not yet built: a call-home on boot so a replica with `DATA` on tmpfs
+refills itself, and an encrypted export of writes made while a replica is
+promoted. Until then, a promoted replica's changes live only in its RAM
+or on its disk.
