@@ -305,9 +305,13 @@ sudo backup/replicate.sh --only asteria       # one host, e.g. after a rebuild
 What the replicas need:
 - `REPLICAS` in `/etc/restic/homelab.env`: tailscale hostnames, space
   separated. The script resolves them with `tailscale ip`, not DNS.
-- A tailscale SSH ACL letting this host reach `containersvc` on each.
-- The repo at `~containersvc/homelab` with `COMPOSE_PROFILES=replica` in
-  its `.env`, and the same `DATA` path as here.
+- A tailscale SSH ACL letting this host reach `root` on each. The push
+  runs as root on the replica so it can replace files the containers
+  rewrote as root and keep skypaw's ownership.
+- The repo checked out with `COMPOSE_PROFILES=replica` in its `.env` and
+  the same `DATA` path as here. `REPLICA_COMPOSE_DIR` in
+  `/etc/restic/homelab.env` names the checkout when it is not
+  `/home/containersvc/homelab`.
 - `VAULTWARDEN_SIGNUPS_ALLOWED=false`, which is now the compose default.
 
 Not yet built: a call-home on boot so a replica with `DATA` on tmpfs

@@ -27,8 +27,8 @@
 #
 # Prerequisites:
 #   1. REPLICAS="asteria acrux ..." in /etc/restic/homelab.env
-#   2. tailscale SSH ACL allowing this host to reach REPLICA_USER on each
-#   3. The replica checked out at ~REPLICA_USER/homelab with COMPOSE_PROFILES
+#   2. tailscale SSH ACL allowing this host to reach root on each replica
+#   3. The replica checked out at REPLICA_COMPOSE_DIR with COMPOSE_PROFILES
 #      set in its .env, and the same $DATA path as here
 
 set -euo pipefail
@@ -37,8 +37,12 @@ set -euo pipefail
 . "$(dirname "$0")/lib.sh"
 hl_load_env
 
-REPLICA_USER="${REPLICA_USER:-containersvc}"
-REPLICA_COMPOSE_DIR="${REPLICA_COMPOSE_DIR:-homelab}"
+# root, so rsync can replace files the containers rewrote as root and
+# preserve ownership. Tailscale SSH gates the login by node and user, so
+# no key or sudoers entry is involved. The compose dir is absolute because
+# root's home is not where the checkout lives.
+REPLICA_USER="${REPLICA_USER:-root}"
+REPLICA_COMPOSE_DIR="${REPLICA_COMPOSE_DIR:-/home/containersvc/homelab}"
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
 
 DRY_RUN=0
@@ -87,12 +91,14 @@ for rel in "${REPLICA_PATHS[@]}"; do
     fi
 done
 
-# rsync flags: archive minus owner/group, because the receiving user is not
-# root and the containers run as root inside their namespaces, so
-# containersvc-owned files are fine. --delete keeps the replica an exact
-# copy; the icon cache is excluded from backups and would otherwise be
-# wiped nightly. -i itemises so the dry pass can be parsed.
-RSYNC=(rsync -rlptDi --delete --exclude icon_cache -e "ssh ${SSH_OPTS[*]}")
+# rsync flags: full archive, so ownership matches skypaw. The receiver has
+# to be root: the containers rewrite their own files as root on every
+# start (AdGuard normalises its YAML, Caddy re-saves cert metadata), and
+# an unprivileged receiver cannot replace those the next night. --delete
+# keeps the replica an exact copy; the icon cache is excluded from backups
+# and would otherwise be wiped nightly. -i itemises so the dry pass can be
+# parsed.
+RSYNC=(rsync -ai --delete --exclude icon_cache -e "ssh ${SSH_OPTS[*]}")
 
 # The dry pass sends all three trees in one call with --relative, anchored
 # at $SRC by the /./ marker, so each lands at its own path under $DATA and
