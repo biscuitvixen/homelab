@@ -150,8 +150,11 @@ for host in $REPLICAS; do
     rc=0
     ssh "${SSH_OPTS[@]}" "$target" \
         "cd $REPLICA_COMPOSE_DIR && docker compose stop ${containers[*]}" || rc=$?
+    # rsync creates the final directory but not its parents, so a tree
+    # like adguard/conf needs adguard/ to exist on a fresh replica first.
     if [[ "$rc" -eq 0 ]]; then
         for rel in "${trees[@]}"; do
+            ssh "${SSH_OPTS[@]}" "$target" "mkdir -p '$DATA/$rel'" || rc=$?
             "${RSYNC[@]}" "$SRC/$rel/" "$target:$DATA/$rel/" >/dev/null || rc=$?
         done
     fi
