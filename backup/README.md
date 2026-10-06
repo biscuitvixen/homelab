@@ -130,7 +130,7 @@ After=docker.service
 [Service]
 Type=oneshot
 EnvironmentFile=/etc/restic/homelab.env
-ExecStart=/opt/homelab/backup/backup.sh
+ExecStart=/home/containersvc/homelab/backup/backup.sh
 User=root
 ```
 
