@@ -61,6 +61,14 @@ services:
     networks:
       - homelab_network
 
+  replica-installer:
+    extends:
+      file: ./services/replica-installer.yml
+      service: replica-installer
+    profiles: ["replica"]
+    networks:
+      - homelab_network
+
   mealie:
     extends:
       file: ./services/mealie.yml

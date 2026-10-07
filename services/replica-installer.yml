@@ -1,0 +1,41 @@
+# Replica installer - applies bundles that skypaw pushes into the inbox.
+# See services/replica-installer/install.sh for the contract and
+# services/replica-installer.md for the host-side setup.
+#
+# This is the one replica service that holds the raw docker socket. Its
+# job is to stop and start the three containers that own the replicated
+# trees, which the read-only socket proxy cannot do, and it does nothing
+# else with the socket. The data root is mounted whole so the inbox, the
+# live trees and the installed copies all sit on one filesystem and a
+# bundle moves between them with a rename.
+services:
+  replica-installer:
+    build:
+      context: ./replica-installer
+    image: replica-installer-local:1-alpine3.22
+    container_name: replica-installer
+    restart: unless-stopped
+    init: true
+    # Ceiling so one service cannot starve the others on a small host.
+    # Idles in a few MB; rsync -c over the vault is the peak.
+    mem_limit: 64m
+    labels:
+      # Built locally and in no registry, so the Docker provider has
+      # nothing to check. The base image is watched through
+      # configs/diun/watch.yml; acting on that means bumping the FROM tag
+      # in services/replica-installer/Dockerfile and rebuilding.
+      diun.enable: "false"
+      homelab.watch-image: "alpine"
+    environment:
+      TZ: ${TZ}
+      # uid of the inbox user on this host; staging/ is chowned to it so
+      # the rsync from skypaw can write there
+      INBOX_UID: ${INBOX_UID:?INBOX_UID is not set}
+      # skypaw's tailnet address and whether to ask it for a push on start
+      REPLICA_PRIMARY: ${REPLICA_PRIMARY:-}
+      REPLICA_CALLHOME: ${REPLICA_CALLHOME:-false}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${DATA:?DATA is not set}:/data
+    # The healthcheck is baked into the image: the watch loop touches a
+    # heartbeat at least once a minute.
