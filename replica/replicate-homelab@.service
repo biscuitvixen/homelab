@@ -1,0 +1,12 @@
+# One push to one replica, started by its request through pushreq-shell.
+# The nightly all-hosts run is replicate-homelab.service on its timer;
+# the per-host lock in replicate.sh keeps the two from overlapping.
+# Install: cp replica/replicate-homelab@.service /etc/systemd/system/
+[Unit]
+Description=Push replica data to %i
+After=docker.service tailscaled.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/restic/homelab.env
+ExecStart=/home/containersvc/homelab/replica/replicate.sh --only %i
