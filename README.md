@@ -27,7 +27,14 @@ homelab/
 │   ├── diun.md                # Diun setup & how to act on a notification
 │   ├── dozzle.yml             # Live container log viewer
 │   ├── uptime-kuma.yml        # Uptime monitoring & status page
+│   ├── raccoon.yml            # Replica installer (replica profile)
+│   ├── raccoon.md             # Replica-side setup
 │   └── docker-socket-proxy.yml # Read-only Docker API for Diun and Dozzle
+│
+├── replica/                    # Nightly push of vault, CA and DNS config to the Pis
+│   ├── replicate.sh           # Restore from restic, deliver into each replica's inbox
+│   ├── pushreq-shell.sh       # Lets a replica ask for a push over Tailscale SSH
+│   └── README.md              # How replication works, skypaw setup, ACLs
 │
 ├── configs/                    # Service configuration files
 │   ├── caddy/
@@ -81,7 +88,8 @@ set without a `--profile` flag.
   - AdGuard + Unbound, serving that site's LAN and the tailnet
   - Caddy + Vaultwarden as a warm standby of the vault
   - Receives `adguard/conf`, `caddy/data` and `vaultwarden` from skypaw
-    nightly via `backup/replicate.sh`; never edited in place
+    nightly into an inbox; the `raccoon` container installs what changed.
+    See [replica/README.md](replica/README.md)
   - Same `${DATA}` path as the server (local disk, or tmpfs on a Pi that
     should hold nothing at rest)
 
