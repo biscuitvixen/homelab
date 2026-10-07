@@ -57,15 +57,15 @@ rp_container() {
     return 1
 }
 
-# rp_manifest <snapshot-id>: the bundle manifest on stdout. The installer
-# acts only on the tree lines; the rest identifies the bundle in logs.
-# Format 1 is one "tree <path> <container>" line per tree.
+# rp_manifest <snapshot-id> <created>: the bundle manifest on stdout. The
+# installer acts only on the tree lines; the rest identifies the bundle
+# in logs. Format 1 is one "tree <path> <container>" line per tree.
 rp_manifest() {
     local pair
     echo "format 1"
     echo "source $(hostname)"
     echo "snapshot $1"
-    echo "created $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    echo "created $2"
     for pair in "${REPLICA_TREES[@]}"; do
         echo "tree ${pair%%:*} ${pair#*:}"
     done
