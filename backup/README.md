@@ -77,7 +77,6 @@ LOCAL_REPOSITORY=/var/backups/homelab-restic
 REMOTE_MOUNT=/mnt/skypaw-core
 REMOTE_REPOSITORY=/mnt/skypaw-core/backups/homelab-restic
 DATA=/var/lib/homelab
-REPLICAS="asteria acrux"
 EOF
 sudo chmod 600 /etc/restic/homelab.env
 ```
@@ -155,15 +154,10 @@ WantedBy=timers.target
 
 Enable it:
 ```bash
-chmod +x backup/backup.sh backup/backup-cli.sh backup/replicate.sh
+chmod +x backup/backup.sh backup/backup-cli.sh
 sudo systemctl daemon-reload
 sudo systemctl enable --now backup-homelab.timer
 ```
-
-The replica push has its own pair, `replicate-homelab.service` and
-`.timer`, identical in shape with `ExecStart=/home/containersvc/homelab/backup/replicate.sh`
-and `OnCalendar=*-*-* 04:30:00`, so it always runs against the snapshot
-the 04:00 job just wrote.
 
 ## Verify
 
@@ -283,41 +277,5 @@ Then fix ownership for the non-root writer (`chown -R 1883:1883
 /var/lib/homelab/mosquitto`), reinstall the systemd units, and
 `docker compose up -d`.
 
-## Replication
-
-Every Pi in the `replica` profile carries a copy of three trees from the
-latest nightly snapshot: `adguard/conf`, `caddy/data` and `vaultwarden`.
-`backup/replicate.sh` restores them here and pushes them out; the replicas
-hold no restic password and never see the repo, only plain files over
-tailscale SSH.
-
-Per host it takes a dry rsync to learn which trees changed, stops only the
-containers that own them, copies, and brings them back with `compose up`.
-Most nights only the vault moves, so replica DNS is untouched. A replica
-that is off (the office Pi at the weekend) is a warning and the rest still
-run; a failed copy is an error and the timer shows it.
-
-Because skypaw is the source of truth, a setting changed on a replica's
-AdGuard is reverted on the next push. Change it on skypaw.
-
-```bash
-sudo backup/replicate.sh --dry-run            # what each host would receive
-sudo backup/replicate.sh --only asteria       # one host, e.g. after a rebuild
-```
-
-What the replicas need:
-- `REPLICAS` in `/etc/restic/homelab.env`: tailscale hostnames, space
-  separated. The script resolves them with `tailscale ip`, not DNS.
-- A tailscale SSH ACL letting this host reach `root` on each. The push
-  runs as root on the replica so it can replace files the containers
-  rewrote as root and keep skypaw's ownership.
-- The repo checked out with `COMPOSE_PROFILES=replica` in its `.env` and
-  the same `DATA` path as here. `REPLICA_COMPOSE_DIR` in
-  `/etc/restic/homelab.env` names the checkout when it is not
-  `/home/containersvc/homelab`.
-- `VAULTWARDEN_SIGNUPS_ALLOWED=false`, which is now the compose default.
-
-Not yet built: a call-home on boot so a replica with `DATA` on tmpfs
-refills itself, and an encrypted export of writes made while a replica is
-promoted. Until then, a promoted replica's changes live only in its RAM
-or on its disk.
+The replica push that runs against this snapshot at 04:30 is a separate
+job; see [replica/README.md](../replica/README.md).
