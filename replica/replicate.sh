@@ -13,7 +13,7 @@
 #
 # This host never runs a command on a replica. The login is the inbox
 # user, whose shell only accepts rsync into the inbox (see
-# services/replica-installer/inbox-shell.sh), so a compromised skypaw can
+# services/raccoon/inbox-shell.sh), so a compromised skypaw can
 # write files there and nothing else. Hosts are resolved with
 # `tailscale ip` rather than DNS, because the DNS hosts run tailscale
 # with --accept-dns=false. An unreachable replica is a warning and the
@@ -31,7 +31,7 @@
 #   1. REPLICAS="asteria acrux ..." in /etc/restic/homelab.env
 #   2. tailscale SSH ACL allowing this host to reach the inbox user on each
 #   3. The replica running the replica profile, with the inbox set up as
-#      described in services/replica-installer.md
+#      described in services/raccoon.md
 
 set -euo pipefail
 

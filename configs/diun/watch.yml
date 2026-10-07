@@ -34,10 +34,10 @@
 - name: mvance/unbound-rpi:latest
   watch_repo: false
 
-# The replica installer is built locally from alpine; this host watches
+# Raccoon, the replica installer, is built locally from alpine; this host watches
 # the base image on the replicas' behalf, as with unbound-rpi above.
 # Acting on it means bumping the FROM tag in
-# services/replica-installer/Dockerfile and rebuilding on each replica.
+# services/raccoon/Dockerfile and rebuilding on each replica.
 - name: alpine
   watch_repo: true
   sort_tags: semver

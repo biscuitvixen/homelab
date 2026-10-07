@@ -61,10 +61,10 @@ services:
     networks:
       - homelab_network
 
-  replica-installer:
+  raccoon:
     extends:
-      file: ./services/replica-installer.yml
-      service: replica-installer
+      file: ./services/raccoon.yml
+      service: raccoon
     profiles: ["replica"]
     networks:
       - homelab_network

@@ -11,7 +11,7 @@
 # 3.2.3 and later) validates the rsync server options itself.
 #
 # Installed by hand to /usr/local/sbin/inbox-shell and set as the inbox
-# user's shell; see ../replica-installer.md.
+# user's shell; see ../raccoon.md.
 
 STAGING=/var/lib/homelab/replica-inbox/staging
 
