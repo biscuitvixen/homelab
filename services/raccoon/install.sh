@@ -1,5 +1,5 @@
 #!/bin/bash
-# Replica installer: watches the inbox for bundles pushed from skypaw and
+# Raccoon, the replica installer: watches the inbox for bundles pushed from skypaw and
 # installs the trees that changed since the last installed bundle.
 #
 # A bundle is a directory under staging/ holding one or more trees and a

@@ -1,6 +1,7 @@
-# Replica installer - applies bundles that skypaw pushes into the inbox.
-# See services/replica-installer/install.sh for the contract and
-# services/replica-installer.md for the host-side setup.
+# Raccoon - the replica installer. It rummages through the inbox, keeps
+# what changed and leaves the rest. Applies bundles that skypaw pushes.
+# See services/raccoon/install.sh for the contract and
+# services/raccoon.md for the host-side setup.
 #
 # This is the one replica service that holds the raw docker socket. Its
 # job is to stop and start the three containers that own the replicated
@@ -9,11 +10,11 @@
 # live trees and the installed copies all sit on one filesystem and a
 # bundle moves between them with a rename.
 services:
-  replica-installer:
+  raccoon:
     build:
-      context: ./replica-installer
-    image: replica-installer-local:1-alpine3.22
-    container_name: replica-installer
+      context: ./raccoon
+    image: raccoon-local:1-alpine3.22
+    container_name: raccoon
     restart: unless-stopped
     init: true
     # Ceiling so one service cannot starve the others on a small host.
@@ -23,7 +24,7 @@ services:
       # Built locally and in no registry, so the Docker provider has
       # nothing to check. The base image is watched through
       # configs/diun/watch.yml; acting on that means bumping the FROM tag
-      # in services/replica-installer/Dockerfile and rebuilding.
+      # in services/raccoon/Dockerfile and rebuilding.
       diun.enable: "false"
       homelab.watch-image: "alpine"
     environment:
