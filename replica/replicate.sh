@@ -1,49 +1,39 @@
 #!/bin/bash
-# Push the replica subset of the latest nightly snapshot to each replica Pi.
+# Push the replica trees from the latest nightly snapshot into each
+# replica's inbox.
 #
-# Runs on skypaw after backup.sh. Restores REPLICA_PATHS from the newest
-# nightly snapshot into a scratch dir, then for every host in REPLICAS:
-#   1. dry rsync to learn which of the three trees actually change
-#   2. stop the containers that own the changing trees
-#   3. real rsync into $DATA over tailscale SSH
-#   4. `docker compose up -d` to bring the stopped containers back
-# vaultwarden is stopped rather than paused because its SQLite file is
-# replaced underneath it. AdGuard and caddy are only restarted on a night
-# their data moved, so replica DNS is normally untouched.
+# Runs on skypaw after backup.sh, or on demand for one host when that
+# host asks (see pushreq-shell.sh). Restores REPLICA_TREES from the newest
+# nightly snapshot into a scratch dir, then for every host in REPLICAS
+# rsyncs the trees into a fresh bundle directory under the host's inbox
+# and sends the manifest last. The manifest's arrival is the replica's
+# signal that the bundle is complete; what to install and which
+# containers to restart is decided there, by the installer, against the
+# bundle it installed previously.
 #
-# The replicas hold no restic password and never see the repo: the restore
-# happens here and only plain files travel. Hosts are resolved with
-# `tailscale ip` rather than DNS, because the DNS hosts run tailscale with
-# --accept-dns=false. An unreachable replica (office Pi powered off) is a
-# warning and the others still run; an rsync or compose failure is an
-# error and the job exits non-zero at the end.
+# This host never runs a command on a replica. The login is the inbox
+# user, whose shell only accepts rsync into the inbox (see
+# services/replica-installer/inbox-shell.sh), so a compromised skypaw can
+# write files there and nothing else. Hosts are resolved with
+# `tailscale ip` rather than DNS, because the DNS hosts run tailscale
+# with --accept-dns=false. An unreachable replica is a warning and the
+# others still run; a failed copy is an error and the job exits non-zero
+# at the end.
 #
 # Usage:
-#   sudo backup/replicate.sh [--dry-run] [--only <host>]
+#   sudo replica/replicate.sh [--dry-run] [--only <host>]
 #
 # Flags:
-#   --dry-run       Show what each host would receive; no stop/start, no writes
-#   --only <host>   Push to one replica, e.g. from its own call-home on boot
+#   --dry-run       Itemise what each host would receive; no manifest is sent
+#   --only <host>   Push to one replica, which must be listed in REPLICAS
 #
 # Prerequisites:
 #   1. REPLICAS="asteria acrux ..." in /etc/restic/homelab.env
-#   2. tailscale SSH ACL allowing this host to reach root on each replica
-#   3. The replica checked out at REPLICA_COMPOSE_DIR with COMPOSE_PROFILES
-#      set in its .env, and the same $DATA path as here
+#   2. tailscale SSH ACL allowing this host to reach the inbox user on each
+#   3. The replica running the replica profile, with the inbox set up as
+#      described in services/replica-installer.md
 
 set -euo pipefail
-
-# shellcheck source=lib.sh
-. "$(dirname "$0")/lib.sh"
-hl_load_env
-
-# root, so rsync can replace files the containers rewrote as root and
-# preserve ownership. Tailscale SSH gates the login by node and user, so
-# no key or sudoers entry is involved. The compose dir is absolute because
-# root's home is not where the checkout lives.
-REPLICA_USER="${REPLICA_USER:-root}"
-REPLICA_COMPOSE_DIR="${REPLICA_COMPOSE_DIR:-/home/containersvc/homelab}"
-SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
 
 DRY_RUN=0
 ONLY=""
@@ -51,25 +41,29 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --dry-run) DRY_RUN=1 ;;
         --only)    ONLY="${2:?--only needs a host}"; shift ;;
-        -h|--help) sed -n '2,32p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '2,33p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "ERROR: unexpected argument: $1" >&2; exit 2 ;;
     esac
     shift
 done
 
+# shellcheck source=lib.sh
+. "$(dirname "$0")/lib.sh"
+rp_load_env
+
+REPLICA_USER="${REPLICA_USER:-inbox}"
+SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new)
+
 if [[ -z "$REPLICAS" ]]; then
     echo "No REPLICAS configured in $ENV_FILE - nothing to do"
     exit 0
 fi
-
-# The container that owns each replica tree; the tree's first path element.
-container_for() {
-    case "$1" in
-        adguard/*) echo adguard ;;
-        caddy/*)   echo caddy ;;
-        *)         echo "${1%%/*}" ;;
-    esac
-}
+# A request for an unlisted host is refused before any restore happens,
+# so the on-demand trigger cannot push to an arbitrary name.
+if [[ -n "$ONLY" ]] && ! grep -qw -- "$ONLY" <<< "$REPLICAS"; then
+    echo "ERROR: $ONLY is not in REPLICAS ($REPLICAS)" >&2
+    exit 2
+fi
 
 SCRATCH="$(mktemp -d /var/tmp/homelab-replicate.XXXXXX)"
 trap 'rm -rf "$SCRATCH"' EXIT
@@ -80,44 +74,40 @@ restore_args=()
 for rel in "${REPLICA_PATHS[@]}"; do
     restore_args+=(--include "$DATA/$rel")
 done
-"${RESTIC_NICE[@]}" restic restore latest --tag nightly \
+snapshot="$(restic snapshots --json --latest 1 --tag nightly \
+    | python3 -c 'import json,sys; s=json.load(sys.stdin); print(s[0]["short_id"] if s else "")')"
+if [[ -z "$snapshot" ]]; then
+    echo "ERROR: no nightly snapshot in $RESTIC_REPOSITORY" >&2
+    exit 1
+fi
+"${RESTIC_NICE[@]}" restic restore "$snapshot" \
     --target "$SCRATCH" "${restore_args[@]}" >/dev/null
 SRC="$SCRATCH$DATA"
 
 for rel in "${REPLICA_PATHS[@]}"; do
     if [[ ! -d "$SRC/$rel" ]]; then
-        echo "ERROR: $rel missing from the restored snapshot" >&2
+        echo "ERROR: $rel missing from snapshot $snapshot" >&2
         exit 1
     fi
 done
 
-# rsync flags: full archive, so ownership matches skypaw. The receiver has
-# to be root: the containers rewrite their own files as root on every
-# start (AdGuard normalises its YAML, Caddy re-saves cert metadata), and
-# an unprivileged receiver cannot replace those the next night. --delete
-# keeps the replica an exact copy; the icon cache is excluded from backups
-# and would otherwise be wiped nightly. -i itemises so the dry pass can be
-# parsed.
-RSYNC=(rsync -ai --delete --exclude icon_cache -e "ssh ${SSH_OPTS[*]}")
+# One bundle name per run, shared by every host, so a replica's installed
+# manifest names the same snapshot and time skypaw logged.
+created="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+bundle="${created//[-:]/}"
+rp_manifest "$snapshot" "$created" > "$SCRATCH/manifest"
 
-# The dry pass sends all three trees in one call with --relative, anchored
-# at $SRC by the /./ marker, so each lands at its own path under $DATA and
-# the itemised paths come back relative to $DATA. --delete under --relative
-# only reaches inside the transferred trees, so adguard/work is safe.
-DRY_SOURCES=("${REPLICA_PATHS[@]/#/$SRC/./}")
+# rsync flags: no owner/group, since the receiver is an unprivileged user
+# and the installer sets root ownership on install. --delete keeps a
+# re-pushed bundle an exact copy; the icon cache is excluded from backups
+# and is not in the snapshot anyway. -i itemises the dry run.
+RSYNC=(rsync -rlpt --delete --exclude icon_cache --timeout=120 -e "ssh ${SSH_OPTS[*]}")
 
-# changed_trees <user@ip>: prints the REPLICA_PATHS entries whose contents
-# would change, one per line, by parsing a dry run. Itemised lines begin
-# with a change flag string, then a space, then the path.
-changed_trees() {
-    local target="$1" path
-    "${RSYNC[@]}" -nR "${DRY_SOURCES[@]}" "$target:$DATA/" 2>/dev/null \
-    | while read -r _ path; do
-        for rel in "${REPLICA_PATHS[@]}"; do
-            [[ "$path" == "$rel" || "$path" == "$rel/"* ]] && echo "$rel"
-        done
-    done | sort -u
-}
+# All trees go in one call with --relative, anchored at $SRC by the /./
+# marker, so each lands at its own path under the bundle directory and
+# the intermediate directories are created on the way. --delete under
+# --relative only reaches inside the transferred trees.
+SOURCES=("${REPLICA_PATHS[@]/#/$SRC/./}")
 
 failed=0
 for host in $REPLICAS; do
@@ -129,47 +119,38 @@ for host in $REPLICAS; do
         continue
     fi
     target="$REPLICA_USER@$ip"
-    if ! ssh "${SSH_OPTS[@]}" "$target" true 2>/dev/null; then
+
+    # The nightly all-hosts run and a boot-time request for one host can
+    # overlap; the second push to the same host is skipped, not queued.
+    exec {lock}>"/run/lock/replicate-homelab-$host.lock"
+    if ! flock -n "$lock"; then
+        echo "WARNING: $host push already running - skipping"
+        continue
+    fi
+
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+        echo "$host: would push bundle $bundle (snapshot $snapshot)"
+        "${RSYNC[@]}" -niR "${SOURCES[@]}" "$target:./$bundle/" | sed 's/^/  /' || true
+        continue
+    fi
+
+    # The manifest goes last and only after every tree succeeded, so the
+    # installer never sees a bundle that is missing part of a tree.
+    rc=0
+    "${RSYNC[@]}" -R "${SOURCES[@]}" "$target:./$bundle/" >/dev/null || rc=$?
+    if [[ "$rc" -eq 255 ]]; then
         echo "WARNING: $host ($ip) unreachable - skipping"
         continue
     fi
-
-    mapfile -t trees < <(changed_trees "$target")
-    if [[ ${#trees[@]} -eq 0 ]]; then
-        echo "$host: up to date"
-        continue
-    fi
-    containers=()
-    for rel in "${trees[@]}"; do
-        containers+=("$(container_for "$rel")")
-    done
-    echo "$host: updating ${trees[*]} (restarting ${containers[*]})"
-
-    if [[ "$DRY_RUN" -eq 1 ]]; then
-        "${RSYNC[@]}" -nR "${DRY_SOURCES[@]}" "$target:$DATA/" | sed "s/^/  /"
-        continue
-    fi
-
-    # Pushing per tree, not all three at once, so a tree whose container is
-    # still running is never touched. Bring the containers back even if the
-    # copy failed: a replica with yesterday's vault beats one with none.
-    rc=0
-    ssh "${SSH_OPTS[@]}" "$target" \
-        "cd $REPLICA_COMPOSE_DIR && docker compose stop ${containers[*]}" || rc=$?
-    # rsync creates the final directory but not its parents, so a tree
-    # like adguard/conf needs adguard/ to exist on a fresh replica first.
     if [[ "$rc" -eq 0 ]]; then
-        for rel in "${trees[@]}"; do
-            ssh "${SSH_OPTS[@]}" "$target" "mkdir -p '$DATA/$rel'" || rc=$?
-            "${RSYNC[@]}" "$SRC/$rel/" "$target:$DATA/$rel/" >/dev/null || rc=$?
-        done
+        "${RSYNC[@]}" "$SCRATCH/manifest" "$target:./$bundle/manifest" >/dev/null || rc=$?
     fi
-    ssh "${SSH_OPTS[@]}" "$target" \
-        "cd $REPLICA_COMPOSE_DIR && docker compose up -d ${containers[*]}" || rc=$?
     if [[ "$rc" -ne 0 ]]; then
-        echo "ERROR: $host push failed (rc=$rc)" >&2
+        echo "ERROR: $host push failed (rsync rc=$rc), manifest not sent" >&2
         failed=1
+        continue
     fi
+    echo "$host: pushed bundle $bundle (snapshot $snapshot)"
 done
 
 exit "$failed"
