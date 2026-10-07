@@ -1,0 +1,5 @@
+# Lets the pushreq login shell start a push for the node that asked.
+# The instance name is validated by the shell before it gets here, and
+# replicate.sh refuses any host that is not in REPLICAS.
+# Install: install -m440 replica/sudoers-pushreq /etc/sudoers.d/pushreq
+pushreq ALL=(root) NOPASSWD: /usr/bin/systemctl start replicate-homelab@*.service

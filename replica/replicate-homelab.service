@@ -1,0 +1,11 @@
+# Nightly push to every replica, after the 04:00 backup has written the
+# snapshot it restores from.
+# Install: cp replica/replicate-homelab.service replica/replicate-homelab.timer /etc/systemd/system/
+[Unit]
+Description=Push replica data to every replica
+After=docker.service tailscaled.service backup-homelab.service
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/restic/homelab.env
+ExecStart=/home/containersvc/homelab/replica/replicate.sh
