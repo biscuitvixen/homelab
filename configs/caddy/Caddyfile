@@ -23,6 +23,16 @@
 		output stdout
 		format json
 	}
+	# Same entries to a file caddy rolls itself, so history outlives the
+	# daemon's 3 x 10 MB rotation of stdout. Bounded to 1 GB or 90 days.
+	log file {
+		output file /var/log/caddy/access.log {
+			roll_size 50MiB
+			roll_keep 20
+			roll_keep_for 2160h
+		}
+		format json
+	}
 }
 
 # === Reverse proxies ===

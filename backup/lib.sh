@@ -36,9 +36,11 @@ hl_load_env() {
 
     BACKUP_PATHS=(
       "$DATA/adguard/conf"      # AdGuardHome.yaml - filters, rewrites, clients
+      "$DATA/adguard/work/data" # query log (90d) + stats.db; filters excluded below
       "$DATA/atuin"             # shell history sqlite
       "$DATA/dozzle"            # users.yml (bcrypt hashes for the log viewer)
       "$DATA/caddy/data"        # internal CA + issued certs (trusted by LAN devices)
+      "$DATA/caddy/logs"        # rolling access log written by caddy itself
       "$DATA/homeassistant"     # config + .storage + recorder sqlite
       "$DATA/mealie"            # recipes sqlite + images
       "$DATA/mosquitto"         # retained-message store
@@ -51,8 +53,8 @@ hl_load_env() {
       # host), so including it here doesn't widen exposure.
       "$COMPOSE_DIR/.env"
     )
-    # NOT backed up: $DATA/adguard/work (query log + stats, rebuilt from
-    # conf), $DATA/caddy/config (admin API autosave, rebuilt from the
+    # NOT backed up: $DATA/adguard/work/data/filters (downloaded filter
+    # lists, refetched on start), $DATA/caddy/config (admin API autosave, rebuilt from the
     # Caddyfile), the scarlet_lavalink_plugins volume (plugin jars
     # re-download on start), and tailscale state (host package, lives in
     # /var/lib/tailscale; a rebuilt host re-auths instead).
@@ -135,8 +137,9 @@ hl_backup() {
         --exclude "$DATA/vaultwarden/icon_cache" \
         --exclude "$DATA/homeassistant/deps" \
         --exclude "$DATA/homeassistant/tts" \
-        --exclude "*.log" \
-        --exclude "*.log.*" \
+        --exclude "$DATA/adguard/work/data/filters" \
+        --exclude "$DATA/homeassistant/*.log*" \
+        --exclude "$DATA/mealie/*.log*" \
         --tag homelab \
         "$@"
 }

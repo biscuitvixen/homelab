@@ -9,6 +9,7 @@ services:
       - ../configs/caddy/Caddyfile:/etc/caddy/Caddyfile:ro  # Config file
       - ${DATA:?DATA is not set}/caddy/data:/data           # Caddy's cert store (internal CA, certs, OCSP cache)
       - ${DATA:?DATA is not set}/caddy/config:/config       # Admin API state (optional but nice to persist)
+      - ${DATA:?DATA is not set}/caddy/logs:/var/log/caddy   # Rolling access log, in the nightly backup
       - ../web:/web:ro                                      # Local websites to serve
     restart: unless-stopped
     # Ceiling so one service cannot starve the other twelve on a 2 GB

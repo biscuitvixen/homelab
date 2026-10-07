@@ -32,6 +32,8 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 |------|----------|-----|
 | `$DATA/adguard/conf` | AdGuardHome.yaml | Filters, DNS rewrites, clients, admin login |
 | `$DATA/atuin` | SQLite DB | Synced shell history |
+| `$DATA/adguard/work/data` | `querylog.json*`, `stats.db` | 90 days of query history and the dashboard statistics. The log is ~1.7 GB but changes by a day's queries each night |
+| `$DATA/caddy/logs` | `access.log*` | Rolling access log, rolled by caddy at 50 MiB, 20 files or 90 days |
 | `$DATA/caddy/data` | Internal CA + issued certs | LAN devices trust this CA — losing it means re-installing the root cert everywhere |
 | `$DATA/homeassistant` | Config, `.storage`, recorder SQLite | Automations, integrations, entity registry, history |
 | `$DATA/mealie` | SQLite DB + images | Recipes |
@@ -42,9 +44,10 @@ job. The time is kept because 04:00 is quiet, not because it has to be.
 | `$DATA/vaultwarden` | SQLite DB, attachments, RSA keys | The password vault. The single most important path in this table |
 | `<repo>/.env` | Deployed secrets | Required to start the stack. Same security boundary as the restic password file (both plaintext on this host), so no extra exposure |
 
-Not backed up: `$DATA/adguard/work` (query log + stats, rebuilt from conf),
-`$DATA/caddy/config` (admin API autosave, rebuilt from the Caddyfile),
-`$DATA/vaultwarden/icon_cache`, `$DATA/homeassistant/{deps,tts}`, `*.log`,
+Not backed up: `$DATA/adguard/work/data/filters` (downloaded filter lists,
+refetched on start), `$DATA/caddy/config` (admin API autosave, rebuilt from
+the Caddyfile), `$DATA/vaultwarden/icon_cache`,
+`$DATA/homeassistant/{deps,tts}`, Home Assistant's and Mealie's own logs,
 the `scarlet_lavalink_plugins` volume (plugin jars re-download on start),
 and tailscale state (host package under `/var/lib/tailscale`; a rebuilt
 host re-auths, which is one command).
