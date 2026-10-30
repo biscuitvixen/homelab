@@ -15,8 +15,8 @@ replica or holds a login there that can write outside the inbox.
 ```
 skypaw (root, 04:30 timer or on request)        replica
   restic restore -> scratch                       $DATA/replica-inbox/
-  rsync trees    -> inbox@pi:./<bundle>/   --->     staging/<bundle>/   written by the inbox user
-  rsync manifest -> inbox@pi:./<bundle>/manifest   work/<bundle>/      claimed by raccoon
+  tar trees+manifest, rsync -> inbox@pi:./  --->   staging/<bundle>.tar  written by the inbox user
+                                                   work/<bundle>/        unpacked by raccoon
                                                    installed/          last installed copy of each tree
   pushreq-shell  <--- ssh pushreq@skypaw <---      rejected/           the last bad bundle
                                                  raccoon container
@@ -25,14 +25,15 @@ skypaw (root, 04:30 timer or on request)        replica
 1. `replica/replicate.sh` restores the trees from the newest `nightly`
    snapshot into a scratch dir and writes a manifest naming the snapshot,
    the time, and which container owns each tree.
-2. For each host in `REPLICAS` it resolves the tailnet address with
-   `tailscale ip`, then rsyncs the trees into a fresh bundle directory
-   under the replica's inbox as the `inbox` user. That user's login shell
+2. It packs the trees and the manifest into one tar named for the time.
+3. For each host in `REPLICAS` it resolves the tailnet address with
+   `tailscale ip`, then rsyncs the tar into the replica's inbox as the
+   `inbox` user. That user's login shell
    (`services/raccoon/inbox-shell.sh`) accepts nothing but an rsync server
-   confined to the staging directory, write-only.
-3. The manifest is sent last and only if every tree succeeded. Its
-   arrival is the signal that the bundle is complete.
-4. Raccoon (`services/raccoon/install.sh`) moves the bundle to `work/`,
+   confined to the staging directory, write-only. rsync writes the tar
+   under a temporary name and renames it when complete, so the replica
+   sees a whole bundle or nothing.
+4. Raccoon (`services/raccoon/install.sh`) unpacks the tar into `work/`,
    compares each tree's content with the copy of the previous bundle it
    keeps under `installed/`, stops the containers whose trees changed,
    replaces those trees, starts the containers, and keeps the new copy as
@@ -49,8 +50,8 @@ AdGuard is reverted on the next push that carries a changed config.
 Change it on skypaw.
 
 A replica that is off is a warning and the others still run; a failed
-copy is an error, the manifest is withheld so the replica ignores the
-partial bundle, and the job exits non-zero.
+copy is an error and the job exits non-zero; a partial transfer never
+appears under its final name on the replica.
 
 ## Asking for a push
 
@@ -65,7 +66,7 @@ which is how a replica with `DATA` on tmpfs refills itself after a boot.
 lock skips a request that overlaps the nightly run.
 
 ```bash
-sudo replica/replicate.sh --dry-run             # connectivity and permissions, no manifest
+sudo replica/replicate.sh --dry-run             # connectivity and permissions, nothing sent
 sudo replica/replicate.sh --only asteria        # one host now
 systemctl start replicate-homelab@asteria       # the same, as the unit
 ```
@@ -111,7 +112,7 @@ The replica-side setup is in [services/raccoon.md](../services/raccoon.md).
 From skypaw as root, after a replica is set up:
 
 ```bash
-replica/replicate.sh --dry-run --only asteria   # lists the three trees
+replica/replicate.sh --dry-run --only asteria   # shows the tar it would send
 replica/replicate.sh --only asteria             # "asteria: pushed bundle ..."
 replica/replicate.sh --only asteria             # again: raccoon logs "unchanged" x3
 ```

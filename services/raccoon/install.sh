@@ -2,10 +2,10 @@
 # Raccoon, the replica installer: watches the inbox for bundles pushed from skypaw and
 # installs the trees that changed since the last installed bundle.
 #
-# A bundle is a directory under staging/ holding one or more trees and a
-# manifest; the manifest arrives last, so its presence means the bundle
-# is complete. Each tree in the manifest names the container that owns
-# it. A tree is installed only if its content differs from the copy of
+# A bundle arrives as one tar in staging/, holding a manifest and one or
+# more trees. rsync renames it into place only once it is whole, so a
+# tar that exists is complete; one that does not unpack is rejected.
+# Each tree in the manifest names the container that owns it. A tree is installed only if its content differs from the copy of
 # the previously installed bundle kept under installed/, which no
 # container ever touches; comparing against the live tree instead would
 # flag every night, because the owning containers rewrite their own files
@@ -19,11 +19,11 @@
 #
 # Layout under $INBOX (which lives under $DATA, so a tmpfs replica loses
 # it with everything else and refills from scratch):
-#   staging/<bundle>/   written by the inbox user over rsync
-#   work/<bundle>/      claimed by this script, being installed
+#   staging/<bundle>.tar  written by the inbox user over rsync
+#   work/<bundle>/        unpacked by this script, being installed
 #   installed/<tree>    pristine copy of the last installed tree
 #   installed/manifest  manifest of the last installed bundle
-#   rejected/<bundle>   the last bundle that failed validation
+#   rejected/<bundle>     the last bundle that failed to unpack or validate
 #
 # Environment:
 #   DATA             live data root inside the container (default /data)
@@ -181,13 +181,24 @@ process_bundle() {
     return "$rc"
 }
 
-# Bundles whose manifest has arrived move from staging to work, oldest
-# first; a bundle still being written stays where it is.
+# Each tar in staging is unpacked into its own directory under work,
+# oldest first. rsync's in-progress temporary file starts with a dot and
+# does not match the glob. A tar that fails to unpack is rejected whole.
 take_staging() {
-    local d
-    for d in "$STAGING"/*/; do
-        [[ -d "$d" && -f "$d/manifest" ]] || continue
-        mv "$d" "$WORK/"
+    local t name
+    for t in "$STAGING"/*.tar; do
+        [[ -f "$t" ]] || continue
+        name="$(basename "$t" .tar)"
+        rm -rf "${WORK:?}/$name"
+        mkdir -p "$WORK/$name"
+        if tar -xf "$t" -C "$WORK/$name"; then
+            rm -f "$t"
+        else
+            error "bundle $name does not unpack"
+            rm -rf "${WORK:?}/$name"
+            rm -rf "${REJECTED:?}"/*
+            mv "$t" "$REJECTED/"
+        fi
     done
 }
 
@@ -230,7 +241,7 @@ log "watching $STAGING"
 while true; do
     # Timeout keeps the heartbeat fresh and catches anything inotify
     # missed; 2 is inotifywait's timeout exit status.
-    inotifywait -q -t 60 -r -e moved_to,close_write,create "$STAGING" >/dev/null 2>&1
+    inotifywait -q -t 60 -e moved_to,close_write "$STAGING" >/dev/null 2>&1
     touch "$HEARTBEAT"
     take_staging
     process_work

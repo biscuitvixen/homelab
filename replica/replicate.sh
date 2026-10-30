@@ -5,11 +5,11 @@
 # Runs on skypaw after backup.sh, or on demand for one host when that
 # host asks (see pushreq-shell.sh). Restores REPLICA_TREES from the newest
 # nightly snapshot into a scratch dir, then for every host in REPLICAS
-# rsyncs the trees into a fresh bundle directory under the host's inbox
-# and sends the manifest last. The manifest's arrival is the replica's
-# signal that the bundle is complete; what to install and which
-# containers to restart is decided there, by the installer, against the
-# bundle it installed previously.
+# delivers them as one tar into the host's inbox. rsync renames the tar
+# into place only when it is complete, so the replica never sees a
+# partial bundle; what to install and which containers to restart is
+# decided there, by the installer, against the bundle it installed
+# previously.
 #
 # This host never runs a command on a replica. The login is the inbox
 # user, whose shell only accepts rsync into the inbox (see
@@ -24,7 +24,7 @@
 #   sudo replica/replicate.sh [--dry-run] [--only <host>]
 #
 # Flags:
-#   --dry-run       Itemise what each host would receive; no manifest is sent
+#   --dry-run       Show what each host would receive without sending it
 #   --only <host>   Push to one replica, which must be listed in REPLICAS
 #
 # Prerequisites:
@@ -91,23 +91,21 @@ for rel in "${REPLICA_PATHS[@]}"; do
     fi
 done
 
-# One bundle name per run, shared by every host, so a replica's installed
-# manifest names the same snapshot and time skypaw logged.
+# One bundle per run, shared by every host, so a replica's installed
+# manifest names the same snapshot and time skypaw logged. The bundle is
+# a single tar of the trees plus the manifest: rsync writes it under a
+# temporary name and renames it into place when complete, so the replica
+# either sees a whole bundle or nothing. The icon cache is excluded from
+# backups and is not in the snapshot anyway.
 created="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-bundle="${created//[-:]/}"
+bundle="${created//[-:]/}.tar"
 rp_manifest "$snapshot" "$created" > "$SCRATCH/manifest"
+tar -cf "$SCRATCH/$bundle" --exclude icon_cache \
+    -C "$SCRATCH" manifest -C "$SRC" "${REPLICA_PATHS[@]}"
 
-# rsync flags: no owner/group, since the receiver is an unprivileged user
-# and the installer sets root ownership on install. --delete keeps a
-# re-pushed bundle an exact copy; the icon cache is excluded from backups
-# and is not in the snapshot anyway. -i itemises the dry run.
-RSYNC=(rsync -rlpt --delete --exclude icon_cache --timeout=120 -e "ssh ${SSH_OPTS[*]}")
-
-# All trees go in one call with --relative, anchored at $SRC by the /./
-# marker, so each lands at its own path under the bundle directory and
-# the intermediate directories are created on the way. --delete under
-# --relative only reaches inside the transferred trees.
-SOURCES=("${REPLICA_PATHS[@]/#/$SRC/./}")
+# No owner/group: the receiver is an unprivileged user and the installer
+# sets root ownership on install. -i itemises the dry run.
+RSYNC=(rsync -pt --timeout=120 -e "ssh ${SSH_OPTS[*]}")
 
 failed=0
 for host in $REPLICAS; do
@@ -129,28 +127,23 @@ for host in $REPLICAS; do
     fi
 
     if [[ "$DRY_RUN" -eq 1 ]]; then
-        echo "$host: would push bundle $bundle (snapshot $snapshot)"
-        "${RSYNC[@]}" -niR "${SOURCES[@]}" "$target:./$bundle/" | sed 's/^/  /' || true
+        echo "$host: would push $bundle (snapshot $snapshot, $(du -h "$SCRATCH/$bundle" | cut -f1))"
+        "${RSYNC[@]}" -ni "$SCRATCH/$bundle" "$target:./" | sed 's/^/  /' || true
         continue
     fi
 
-    # The manifest goes last and only after every tree succeeded, so the
-    # installer never sees a bundle that is missing part of a tree.
     rc=0
-    "${RSYNC[@]}" -R "${SOURCES[@]}" "$target:./$bundle/" >/dev/null || rc=$?
+    "${RSYNC[@]}" "$SCRATCH/$bundle" "$target:./" >/dev/null || rc=$?
     if [[ "$rc" -eq 255 ]]; then
         echo "WARNING: $host ($ip) unreachable - skipping"
         continue
     fi
-    if [[ "$rc" -eq 0 ]]; then
-        "${RSYNC[@]}" "$SCRATCH/manifest" "$target:./$bundle/manifest" >/dev/null || rc=$?
-    fi
     if [[ "$rc" -ne 0 ]]; then
-        echo "ERROR: $host push failed (rsync rc=$rc), manifest not sent" >&2
+        echo "ERROR: $host push failed (rsync rc=$rc)" >&2
         failed=1
         continue
     fi
-    echo "$host: pushed bundle $bundle (snapshot $snapshot)"
+    echo "$host: pushed $bundle (snapshot $snapshot)"
 done
 
 exit "$failed"

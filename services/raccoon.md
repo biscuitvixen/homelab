@@ -51,8 +51,8 @@ ls /var/lib/homelab/replica-inbox/{staging,work,installed,rejected}
 
 A normal night logs the bundle name, one `changed` or `unchanged` line
 per tree, and `installed` for what moved. `rejected/` holds the last
-bundle that failed validation, with the reason in the log; the live trees
-are untouched when that happens. A bundle left in `work/` means a copy or
+bundle that failed to unpack or validate, with the reason in the log; the
+live trees are untouched when that happens. A bundle left in `work/` means a copy or
 a container stop failed and raccoon will retry it on the next pass.
 
 Raccoon's healthcheck is a heartbeat the watch loop touches at least once
