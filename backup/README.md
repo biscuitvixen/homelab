@@ -275,4 +275,4 @@ sudo -E restic -r "$REMOTE_REPOSITORY" restore latest --target /
 ```
 Then fix ownership for the non-root writer (`chown -R 1883:1883
 /var/lib/homelab/mosquitto`), reinstall the systemd units, and
-`docker compose --profile serv up -d`.
+`docker compose up -d`.
